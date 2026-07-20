@@ -1,0 +1,278 @@
+/**
+ * ============================================================
+ * BACKEND GRATUITO (Google Sheets + Apps Script) para la app
+ * "Terapias de reemplazo renal continuas"
+ * Autor de la app: Hernán Herrera · Versión 1 · 2026
+ * ============================================================
+ *
+ * QUÉ HACE:
+ * 1) Recibe los registros de usuarios y las respuestas de la
+ *    Evaluación sumativa (Módulo 4) y el Taller práctico (Módulo 5)
+ *    enviadas por la app, y las guarda en tres pestañas de esta
+ *    misma hoja de cálculo: "Usuarios", "Sumativa" y "Taller".
+ *    El panel de administrador de la app puede luego leer estos
+ *    datos desde cualquier computador con el botón
+ *    "Sincronizar desde la nube".
+ * 2) Atiende las preguntas del chatbot "Tutor" (método socrático),
+ *    reenviándolas al modelo de IA Gemini junto con el contenido
+ *    curricular de la app, y devuelve la respuesta a la app.
+ *
+ * INSTALACIÓN: ver instrucciones paso a paso entregadas junto
+ * a este archivo. En resumen: pegue todo este código en
+ * Extensiones > Apps Script de una hoja de Google Sheets nueva,
+ * despliegue como aplicación web, y copie la URL resultante
+ * dentro de index.html en la constante SHEETS_API_URL.
+ *
+ * PARA ACTIVAR EL TUTOR (chatbot socrático):
+ * 1. Consiga una API key gratuita de Gemini en
+ *    https://aistudio.google.com/apikey (con su cuenta de Gmail).
+ * 2. En este proyecto de Apps Script: ⚙️ Configuración del proyecto
+ *    (ícono de engranaje, panel izquierdo) > sección
+ *    "Propiedades del script" > "Añadir propiedad de secuencia de comandos".
+ *    Nombre: GEMINI_API_KEY   Valor: (pegue aquí su API key)
+ * 3. Guarde y vuelva a implementar la aplicación web (Implementar >
+ *    Gestionar implementaciones > lápiz de editar > Nueva versión > Implementar).
+ * Mientras no exista esta propiedad, el Tutor mostrará un aviso
+ * amable indicando que aún no está configurado, sin romper el resto
+ * de la app.
+ */
+
+// Debe coincidir EXACTAMENTE con ADMIN_PASSWORD en index.html
+var ADMIN_KEY = "UCIP-Renal-2026";
+
+var SHEET_USERS = "Usuarios";
+var SHEET_M4 = "Sumativa";
+var SHEET_M5 = "Taller";
+
+// Modelo de Gemini usado por el Tutor (rápido y gratuito en Google AI Studio).
+var GEMINI_MODEL = "gemini-2.5-flash";
+
+/* ---------- Utilidades ---------- */
+
+function getSheet_(name, headers) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(name);
+  if (!sh) {
+    sh = ss.insertSheet(name);
+    sh.appendRow(headers);
+    sh.setFrozenRows(1);
+  }
+  return sh;
+}
+
+function jsonOut_(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function readSheetAsObjects_(name) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName(name);
+  if (!sh) return [];
+  var data = sh.getDataRange().getValues();
+  if (data.length < 2) return [];
+  var headers = data[0];
+  var out = [];
+  for (var i = 1; i < data.length; i++) {
+    var row = {};
+    for (var j = 0; j < headers.length; j++) {
+      row[headers[j]] = data[i][j];
+    }
+    out.push(row);
+  }
+  return out;
+}
+
+/* ---------- Escritura (llamada por la app con POST) ---------- */
+
+function upsertUser_(p) {
+  var sh = getSheet_(SHEET_USERS, ["id", "name", "email", "idRotation", "registeredAt", "lastActiveAt"]);
+  var data = sh.getDataRange().getValues();
+  var now = new Date().toISOString();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === p.id) {
+      sh.getRange(i + 1, 2).setValue(p.name || data[i][1]);
+      sh.getRange(i + 1, 4).setValue(p.idRotation || data[i][3]);
+      sh.getRange(i + 1, 6).setValue(now);
+      return;
+    }
+  }
+  sh.appendRow([p.id, p.name, p.email, p.idRotation, p.registeredAt || now, now]);
+}
+
+function logM4Answer_(p) {
+  var sh = getSheet_(SHEET_M4, ["userId", "questionId", "questionText", "chosenText", "correct", "at"]);
+  sh.appendRow([p.userId, p.questionId, p.questionText, p.chosenText, p.correct, p.at]);
+}
+
+function logM4Completed_(p) {
+  var sh = getSheet_(SHEET_M4, ["userId", "questionId", "questionText", "chosenText", "correct", "at"]);
+  sh.appendRow([p.userId, "COMPLETADO", "", "", "score:" + p.score + "/" + p.total, p.at]);
+}
+
+function logM5Attempt_(p, kind) {
+  var sh = getSheet_(SHEET_M5, ["userId", "kind", "stepId", "stepTitle", "attemptNum", "chosenText", "correct", "at"]);
+  sh.appendRow([p.userId, kind, p.stepId, p.stepTitle, p.attemptNum, p.chosenText, p.correct, p.at]);
+}
+
+/* ============================================================
+   TUTOR SOCRÁTICO — contenido curricular de referencia
+   Resumen del contenido del Módulo 1 de la app (parafraseado de
+   los artículos originales), usado como base de conocimiento
+   para que el Tutor responda de forma fiel al temario del curso.
+   ============================================================ */
+var TRRC_KNOWLEDGE_BASE = `## Fundamentos físicos de la depuración
+Las modalidades de TRRC combinan cuatro principios de transporte: difusión, ultrafiltración, convección y adsorción. Difusión: paso de solutos a través de una membrana permeable de mayor a menor concentración por movimiento molecular aleatorio hasta el equilibrio; elimina de modo efectivo moléculas de bajo peso molecular. Ultrafiltración: movimiento de líquido a través de una membrana semipermeable impulsado por un gradiente de presión; algunos solutos de bajo peso pueden acompañar el agua ultrafiltrada. Convección: movimiento en masa de moléculas por "arrastre" del solvente (solvent drag) a través de una membrana de alta permeabilidad, con reposición simultánea de líquido; elimina solutos de peso molecular bajo y medio, incluidos mediadores inflamatorios. Adsorción: adhesión selectiva de moléculas a la pared de la membrana según propiedades físico-químicas; la membrana AN-69 (cargada negativamente) puede unir citoquinas. Escala de tamaño molecular: solutos pequeños (Na 23, K 35, urea 60, creatinina 113, fosfato 80 Da) atraviesan poros pequeños; moléculas medianas (vitamina B12 1355, inulina 5200, β2-microglobulina 11800 Da) requieren convección o poros mayores; la albúmina (55000-60000 Da) debe ser retenida. El hemofiltro está formado por fibras huecas: la sangre entra por el extremo inferior y sale por el superior, el dializado circula a contracorriente. Materiales de membrana más usados: polisulfona, poliamida, acrilonitrilos y polietersulfonas.
+
+## Indicaciones y momento de inicio
+Indicaciones renales: lesión renal aguda (LRA) y sobrecarga hídrica (FO). Indicaciones no renales: eliminación de metabolitos tóxicos en falla hepática aguda, errores innatos del metabolismo, intoxicaciones, remoción de mediadores inflamatorios en sepsis, insuficiencia cardíaca refractaria, hiperkalemia/hipernatremia severas, acidosis metabólica severa (pH<7.0), rabdomiólisis, uremia sintomática. Fórmula de sobrecarga hídrica: %FO = (líquidos administrados - líquidos eliminados) / peso de admisión a UCIP x 100. La mortalidad aumenta con FO>10-15%. La mayoría de expertos recomienda considerar TRRC con FO>10% cuando los diuréticos no logran revertir el balance. Cuatro modalidades: SCUF (solo ultrafiltración, sin solución de tratamiento), CVVH (convección, 30-4000 mL/h), CVVHD (difusión, sin solución de tratamiento), CVVHDF (difusión+convección, 70-4000 mL/h, la más compleja pero de espectro terapéutico más amplio, útil en rabdomiólisis, sepsis y falla orgánica múltiple).
+
+## Accesos vasculares y catéteres
+La resistencia del catéter sigue la ley de Poiseuille: el flujo es proporcional a la cuarta potencia del radio interno e inversamente proporcional a la longitud y viscosidad (Q = π·ΔP·r⁴ / 8·η·L). El cociente diámetro-catéter/diámetro-vaso no debe superar 0.45 para prevenir trombosis venosa central. Jerarquía de sitios: yugular interna derecha > femoral > yugular interna izquierda > subclavia (evitar por riesgo de estenosis venosa central). Calibre mínimo preferido: 6.5 Fr. Calibres por peso: neonato <3kg: 5-7Fr; 3-6kg: 7Fr; 6-12kg: 8Fr; 12-20kg: 8-9Fr; 20-30kg: 8-10Fr; >30kg: 10-12Fr. Regla del 10%: el volumen del circuito extracorpóreo (VEC) no debe superar el 10% de la volemia del paciente (≤8 mL/kg). Volemia de referencia: neonato a término 80-90 mL/kg, prematuro 90-100 mL/kg, lactante 70-80 mL/kg, niño 70-75 mL/kg. Síndrome de liberación de bradiquinina: riesgo con cebado de sangre ácida en membranas de acrilonitrilo (AN-69); se previene con ultrafiltración a balance cero antes del cebado o tamponando con bicarbonato/THAM.
+
+## Circuito extracorpóreo y máquina Prismaflex
+Componentes: catéter de doble luz, líneas arterial y venosa, cámara atrapaburbujas, hemofiltro, detector de aire y clamp de seguridad en la línea de retorno, bombas (sangre, jeringa de anticoagulante, y hasta cinco bombas incluyendo PBP para reposición prefiltro que permite anticoagulación con citrato), bolsas de dializado/efluente/reposición/anticoagulante montadas en básculas gravimétricas. En Prismaflex la sangre entra al filtro por su extremo inferior, facilitando el purgado. Selección del set de hemofiltro según peso: HF20 (0.2m², cebado 58mL, flujo mín 20mL/min, ≥8kg); M60/AN-69 (0.6m², cebado 93mL, flujo mín 50mL/min, ≥11kg); M100 (0.9-1.0m², cebado 152mL, flujo mín 75mL/min, ≥30kg); M150 (1.5m², cebado 189mL, flujo mín 100mL/min, ≥30kg).
+
+## Cinética de membrana y solución de problemas
+Fracción de filtración (FF) = Q_UF/Q_P; debe mantenerse <20-25% para preservar la vida del filtro; FF alta hemoconcentra la sangre en la fibra hueca y aumenta el riesgo de coagulación. Para reducir FF: aumentar flujo de sangre (Qb), aumentar flujo de dializado, aumentar fracción prefiltro de reposición, disminuir flujo total de reposición. Presión transmembrana (PTM) >250 mmHg indica coagulación membranosa sustancial; un ascenso progresivo de PTM en 4-5h sugiere coagulación rápidamente progresiva del filtro. Alarmas: baja presión de acceso ("arterial baja", causas: línea acodada, coagulada, catéter contra la pared, hipovolemia); alta presión de retorno ("venosa alta", mismas causas de acodadura/coagulación/obstrucción posicional); elevación de PTM (filtro colmatándose, línea acodada, flujo lento). Medidas para prolongar vida del filtro: optimizar acceso vascular, responder pronto a alarmas, minimizar convección y preferir difusión cuando sea posible, usar predilución, mantener FF<20-25%, minimizar contacto sangre-aire, lavados con salino cada 30-60 min si no hay anticoagulación.
+
+## Anticoagulación: citrato regional vs. heparina
+Citrato: quela el calcio iónico formando complejos citrato-calcio no ionizados, inhibiendo la cascada de coagulación en el circuito; peso molecular 191 Da (difunde fácil, se pierde en el efluente); se metaboliza en hígado/riñón/músculo a bicarbonato (1 citrato → 3 bicarbonato); el calcio perdido se repone con infusión sistémica. Metas de titulación: iCa posfiltro 0.25-0.35 mmol/L (rango aceptado 0.25-0.45), iCa sistémico ≥0.9 mmol/L, relación tCa/iCa ≤2.5 (marcador de acumulación/toxicidad por citrato). Complicaciones del citrato: alcalosis metabólica (la más frecuente), acidosis metabólica, hipocalcemia, hipernatremia, hipomagnesemia, hipofosfatemia. Contraindicaciones: enfermedad hepática, choque hepático, acidosis láctica severa. Heparina no fraccionada (HNF): bolo inicial 20-50 U/kg, infusión 5-20 U/kg/h, monitoreo con aPTT 45-60s (1.5-2x normal) o ACT 180-240s; depende de la antitrombina III (mantener >100%). HBPM (enoxaparina): carga 0.15mg/kg + infusión 0.05mg/kg/h, monitoreo anti-Xa 0.25-0.35 UI/mL. Las guías KDIGO 2012 recomiendan citrato regional (RCA) como anticoagulante de primera línea sin contraindicación; RCA tiene menor tasa de coagulación y mayor vida del circuito que heparina, a costa de más alteraciones metabólicas.
+
+## Programación de la máquina y homeostasis líquida
+Paso 1, flujo de sangre (Qb): inicio 3-5 mL/kg/min, aumentar a 8-10 mL/kg/min si se tolera (máximo práctico 150 mL/min, hasta 300 en niños grandes); presión de entrada objetivo >-150 mmHg. Paso 2, dosis de efluente (Qeff = Q_UF + Q_D): objetivo 20-25 mL/kg/h (KDIGO), prescribir 25-35 mL/kg/h para lograr razón entregada/prescrita ≥0.8; en CVVHDF el dializado es 50% de la dosis y la reposición el otro 50%. Paso 3, ultrafiltración neta: UFR = (ingresos - egresos + balance objetivo negativo)/24h; límites de seguridad de remoción 0.5-2 mL/kg/h o 1-3% de la volemia por hora; en paciente inestable iniciar en 0 mL/h e incrementar gradualmente. La homeostasis líquida busca equilibrio entre ingresos y egresos evitando sobrecarga e hipovolemia; la TRRC continua permite retiro lento y sostenido de agua sin oscilaciones bruscas.
+
+## Fisiología del destete
+El destete ("reto renal") se plantea cuando se cumplen las metas iniciales de la terapia. Criterios: estabilidad hemodinámica, electrolitos y ácido-base normales, volumen urinario adecuado. Indicadores clínicos de discontinuación: aumento de diuresis, resolución de la sobrecarga hídrica, ausencia de necesidad de vasoactivos. Considerar "pausa del filtro" si diuresis espontánea >0.5 mL/kg/h con estado ácido-base y electrolitos controlados; el mejor correlato de éxito es diuresis espontánea >0.5 mL/kg/h sostenida 6-24h. KDIGO desaconseja usar diuréticos solo para acortar la duración de la TRRC. Con frecuencia se requiere hemodiálisis intermitente o SLED como puente antes de la discontinuación total.`;
+
+var TUTOR_SYSTEM_PROMPT = "Eres «Tutor», el asistente educativo dentro de una app para fellows de Cuidado Intensivo Pediátrico (UCIP) que estudian Terapias de Reemplazo Renal Continuas (TRRC).\n\n" +
+  "MÉTODO: usas siempre el método socrático. Nunca das la respuesta completa de inmediato.\n" +
+  "1. Cuando el estudiante hace una pregunta o plantea un problema, respóndele con una pregunta guía que lo oriente a construir la respuesta por sí mismo, o pídele que dé el primer paso.\n" +
+  "2. Evalúa lo que responde: si va bien encaminado, refuerza con una frase breve de ánimo y continúa con la siguiente pregunta hasta que él mismo arme la respuesta completa. Si está equivocado o incompleto, no lo corrijas de golpe: da una pista más concreta y anímalo a intentarlo de nuevo.\n" +
+  "3. Adapta el nivel de exigencia a lo que el estudiante va mostrando: si domina el tema, profundiza y pregunta el 'por qué' o el razonamiento fisiopatológico/técnico; si muestra dificultad, simplifica, da pistas más directas y desglosa el problema en pasos más pequeños.\n" +
+  "4. Sé cálido, paciente y motivador. Usa frases como '¡Vas muy bien!', 'Casi lo tienes, piensa en...', 'Buen intento, revisemos ese punto...'.\n" +
+  "5. Solo da la respuesta completa si el estudiante lo pide explícitamente (ej. 'dame la respuesta', 'no sé', 'explícamelo') o tras 2-3 intentos fallidos seguidos sobre el mismo punto; incluso entonces, cierra con una pregunta corta que verifique que comprendió.\n" +
+  "6. Basa TODAS tus respuestas estrictamente en el CONTENIDO CURRICULAR DE REFERENCIA de abajo. No inventes datos clínicos, dosis o cifras que no estén ahí. Si la pregunta se sale de este temario (TRRC pediátrica), dilo amablemente y redirige la conversación al temario del curso.\n" +
+  "7. Cuando sea útil, menciona a qué tema del contenido pertenece lo que están discutiendo (por ejemplo: 'esto lo vimos en Anticoagulación...').\n" +
+  "8. Mantén cada respuesta breve: máximo 4-6 líneas. Esto es un chat, no un ensayo. No uses markdown ni listas largas, escribe en prosa conversacional.\n" +
+  "9. Responde siempre en español.\n\n" +
+  "CONTENIDO CURRICULAR DE REFERENCIA:\n" + TRRC_KNOWLEDGE_BASE;
+
+/* ---------- Tutor socrático (llamada al modelo Gemini) ---------- */
+
+function tutorChat_(p) {
+  var apiKey = PropertiesService.getScriptProperties().getProperty("GEMINI_API_KEY");
+  if (!apiKey) {
+    return jsonOut_({ ok: false, error: "El Tutor todavía no está activado. El administrador debe configurar la API key de Gemini en las Propiedades del script." });
+  }
+
+  var history = p.history || [];
+  var contents = [];
+  for (var i = 0; i < history.length; i++) {
+    var h = history[i];
+    if (!h || !h.text) continue;
+    contents.push({ role: (h.role === "user" ? "user" : "model"), parts: [{ text: String(h.text) }] });
+  }
+  contents.push({ role: "user", parts: [{ text: String(p.message || "") }] });
+
+  var payload = {
+    systemInstruction: { parts: [{ text: TUTOR_SYSTEM_PROMPT }] },
+    contents: contents,
+    generationConfig: { temperature: 0.6, maxOutputTokens: 400 }
+  };
+
+  var url = "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent?key=" + encodeURIComponent(apiKey);
+  var resp;
+  try {
+    resp = UrlFetchApp.fetch(url, {
+      method: "post",
+      contentType: "application/json",
+      payload: JSON.stringify(payload),
+      muteHttpExceptions: true
+    });
+  } catch (err) {
+    return jsonOut_({ ok: false, error: "No se pudo conectar con el Tutor: " + String(err) });
+  }
+
+  var code = resp.getResponseCode();
+  var text = resp.getContentText();
+  if (code !== 200) {
+    return jsonOut_({ ok: false, error: "El servicio de IA respondió con un error (" + code + "). Intenta de nuevo en un momento." });
+  }
+
+  var json;
+  try {
+    json = JSON.parse(text);
+  } catch (e) {
+    return jsonOut_({ ok: false, error: "Respuesta inválida del servicio de IA." });
+  }
+
+  var reply = "";
+  try {
+    reply = json.candidates[0].content.parts[0].text;
+  } catch (e) {
+    var reason = (json.candidates && json.candidates[0] && json.candidates[0].finishReason) || "desconocido";
+    return jsonOut_({ ok: false, error: "El Tutor no pudo generar una respuesta esta vez (motivo: " + reason + "). Intenta reformular tu mensaje." });
+  }
+
+  return jsonOut_({ ok: true, reply: reply });
+}
+
+/* ---------- Punto de entrada: escrituras y chat desde la app ---------- */
+
+function doPost(e) {
+  var body = JSON.parse(e.postData.contents);
+  var action = body.action;
+  var p = body.payload || {};
+
+  // El chat del Tutor no requiere bloqueo de hoja de cálculo (no escribe filas).
+  if (action === "tutorChat") {
+    try {
+      return tutorChat_(p);
+    } catch (err) {
+      return jsonOut_({ ok: false, error: "Error interno del Tutor: " + String(err) });
+    }
+  }
+
+  var lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    if (action === "upsertUser") {
+      upsertUser_(p);
+    } else if (action === "m4Answer") {
+      logM4Answer_(p);
+    } else if (action === "m4Completed") {
+      logM4Completed_(p);
+    } else if (action === "m5Attempt") {
+      logM5Attempt_(p, "montaje");
+    } else if (action === "m5TsAttempt") {
+      logM5Attempt_(p, "troubleshoot");
+    } else {
+      return jsonOut_({ ok: false, error: "acción desconocida: " + action });
+    }
+    return jsonOut_({ ok: true });
+  } catch (err) {
+    return jsonOut_({ ok: false, error: String(err) });
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/* ---------- Punto de entrada: lectura desde el panel admin ---------- */
+
+function doGet(e) {
+  var key = e.parameter.key;
+  if (key !== ADMIN_KEY) {
+    return jsonOut_({ ok: false, error: "clave inválida" });
+  }
+  var action = e.parameter.action || "getAll";
+  if (action === "getAll") {
+    return jsonOut_({
+      ok: true,
+      users: readSheetAsObjects_(SHEET_USERS),
+      m4: readSheetAsObjects_(SHEET_M4),
+      m5: readSheetAsObjects_(SHEET_M5)
+    });
+  }
+  return jsonOut_({ ok: false, error: "acción desconocida" });
+}
