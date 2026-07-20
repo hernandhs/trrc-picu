@@ -1,0 +1,2335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terapias de Reemplazo Renal Continuas — Aplicación interactiva UCIP</title>
+<style>
+/* ============================================================
+   TERAPIA DE REEMPLAZO RENAL CONTINUA — HDFVVC EN PRISMAFLEX
+   Aplicación educativa interactiva para fellows de UCIP
+   Todo el contenido textual proviene exclusivamente de los
+   artículos de la carpeta "articulos". CSS y JS embebidos.
+   ============================================================ */
+
+:root{
+  --navy-950:#0a1830;
+  --navy-900:#0f2340;
+  --navy-800:#15315c;
+  --navy-700:#1c4079;
+  --navy-600:#25529c;
+  --teal-600:#0f766e;
+  --teal-500:#0d9488;
+  --teal-400:#2dd4bf;
+  --amber-500:#d97706;
+  --amber-100:#fef3c7;
+  --red-600:#b91c1c;
+  --red-100:#fee2e2;
+  --green-600:#15803d;
+  --green-100:#dcfce7;
+  --ink-900:#0f172a;
+  --ink-700:#334155;
+  --ink-500:#64748b;
+  --line:#dbe3ee;
+  --bg:#f4f7fb;
+  --card:#ffffff;
+  --radius:10px;
+  --shadow:0 1px 3px rgba(15,35,64,.08), 0 4px 14px rgba(15,35,64,.06);
+  --focus:0 0 0 3px rgba(45,212,191,.55);
+  --maxw:1180px;
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink-900);
+  background:var(--bg);
+  line-height:1.55;
+}
+h1,h2,h3,h4{font-family:"Segoe UI",Roboto,Helvetica,Arial,sans-serif; line-height:1.25; color:var(--navy-900); margin:0 0 .5em;}
+h1{font-size:1.5rem;}
+h2{font-size:1.35rem; border-bottom:2px solid var(--line); padding-bottom:.4rem;}
+h3{font-size:1.1rem; color:var(--teal-600);}
+p{margin:.5em 0 1em;}
+a{color:var(--teal-600);}
+img{max-width:100%; display:block;}
+button{font-family:inherit; cursor:pointer;}
+:focus-visible{outline:none; box-shadow:var(--focus); border-radius:4px;}
+.sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;}
+
+/* Skip link */
+.skip-link{
+  position:absolute; left:-999px; top:0; background:var(--navy-900); color:#fff;
+  padding:.6em 1em; z-index:200; border-radius:0 0 8px 0;
+}
+.skip-link:focus{left:0;}
+
+/* ---------- HEADER ---------- */
+header.app-header{
+  background:linear-gradient(120deg,var(--navy-950),var(--navy-800));
+  color:#fff;
+  padding:.9rem 1.25rem;
+  position:sticky; top:0; z-index:100;
+  box-shadow:0 2px 10px rgba(0,0,0,.25);
+}
+.header-inner{max-width:var(--maxw); margin:0 auto; display:flex; flex-direction:column; align-items:center; gap:.6rem; text-align:center;}
+.brand{display:flex; flex-direction:column; align-items:center; gap:.4rem;}
+.brand-badge{
+  width:44px; height:44px; border-radius:9px; background:var(--teal-500);
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.05rem; color:#fff; flex-shrink:0;
+}
+.brand-text{display:flex; flex-direction:column; align-items:center;}
+.brand-text h1{color:#fff; margin:0; font-size:1.5rem; text-align:center;}
+.brand-text span{font-size:.72rem; color:#b9c8e0; letter-spacing:.02em;}
+.brand-text .brand-credit{color:var(--teal-400); font-weight:600; margin-top:.15rem;}
+
+.global-progress{width:100%; max-width:420px;}
+.global-progress .gp-label{display:flex; justify-content:space-between; font-size:.72rem; color:#c8d6ec; margin-bottom:.25rem;}
+.gp-track{height:8px; border-radius:6px; background:rgba(255,255,255,.18); overflow:hidden;}
+.gp-fill{height:100%; background:linear-gradient(90deg,var(--teal-400),var(--teal-500)); width:0%; transition:width .4s ease;}
+
+/* ---------- NAV TABS ---------- */
+nav.module-nav{
+  background:var(--navy-900);
+  border-top:1px solid rgba(255,255,255,.08);
+}
+.module-nav-inner{
+  max-width:var(--maxw); margin:0 auto; display:flex; overflow-x:auto;
+  scrollbar-width:thin;
+}
+.mod-btn{
+  background:transparent; border:none; color:#c8d6ec; padding:.75rem 1rem;
+  font-size:.85rem; font-weight:600; white-space:nowrap; border-bottom:3px solid transparent;
+  display:flex; align-items:center; gap:.4rem;
+}
+.mod-btn .num{
+  width:20px; height:20px; border-radius:50%; background:rgba(255,255,255,.12);
+  display:inline-flex; align-items:center; justify-content:center; font-size:.7rem;
+}
+.mod-btn[aria-selected="true"]{color:#fff; border-bottom-color:var(--teal-400); background:rgba(255,255,255,.05);}
+.mod-btn:hover{color:#fff;}
+.mod-btn .check{color:var(--teal-400); font-size:.85rem;}
+
+/* ---------- LAYOUT ---------- */
+main{max-width:var(--maxw); margin:0 auto; padding:1.5rem 1.25rem 4rem;}
+.module-panel{display:none; animation:fadeIn .25s ease;}
+.module-panel.active{display:block;}
+@keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+.module-intro{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:1.1rem 1.3rem; margin-bottom:1.25rem; box-shadow:var(--shadow);
+  border-left:5px solid var(--teal-500);
+}
+.module-intro h2{border:none; margin-bottom:.3rem;}
+.module-intro p{margin:0; color:var(--ink-700); font-size:.95rem;}
+
+/* ---------- MODULE 1: CONTENT ---------- */
+.section-tablist{display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:1rem;}
+.section-tab{
+  background:#fff; border:1px solid var(--line); border-radius:20px; padding:.4rem .9rem;
+  font-size:.8rem; font-weight:600; color:var(--navy-700);
+}
+.section-tab[aria-selected="true"]{background:var(--navy-800); color:#fff; border-color:var(--navy-800);}
+.section-tab .dot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--teal-400); margin-left:.35rem; vertical-align:middle; opacity:0;}
+.section-tab.done .dot{opacity:1;}
+
+.content-section{display:none; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:1.4rem; box-shadow:var(--shadow);}
+.content-section.active{display:block;}
+.content-grid{display:grid; grid-template-columns:1.15fr .85fr; gap:1.5rem; align-items:start;}
+@media (max-width:820px){.content-grid{grid-template-columns:1fr;}}
+
+.fig-card{background:#f8fafc; border:1px solid var(--line); border-radius:8px; padding:.75rem; position:sticky; top:110px;}
+.fig-card img{border-radius:6px; border:1px solid var(--line); background:#fff;}
+.fig-card figcaption{font-size:.78rem; color:var(--ink-500); margin-top:.5rem;}
+.fig-card.static{position:static;}
+
+.hotspot-wrap{position:relative; display:inline-block; width:100%;}
+.hotspot{
+  position:absolute; width:24px; height:24px; border-radius:50%;
+  background:var(--amber-500); color:#fff; border:2px solid #fff; font-size:.72rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center; transform:translate(-50%,-50%);
+  box-shadow:0 1px 4px rgba(0,0,0,.4);
+}
+.hotspot:hover, .hotspot:focus-visible{background:var(--teal-600);}
+.hotspot-pop{
+  display:none; position:absolute; z-index:20; background:var(--navy-950); color:#fff; padding:.6rem .8rem;
+  border-radius:8px; font-size:.78rem; width:220px; box-shadow:0 6px 20px rgba(0,0,0,.35); line-height:1.4;
+}
+.hotspot-pop.show{display:block;}
+
+dfn.gloss{
+  border-bottom:1.5px dotted var(--teal-600); color:var(--teal-700, var(--teal-600)); font-style:normal; font-weight:600;
+  cursor:pointer; padding:0 1px;
+}
+.gloss-tooltip{
+  position:fixed; z-index:300; max-width:280px; background:var(--navy-950); color:#fff; padding:.7rem .85rem;
+  border-radius:8px; font-size:.8rem; box-shadow:0 10px 30px rgba(0,0,0,.4); display:none; line-height:1.45;
+}
+.gloss-tooltip.show{display:block;}
+.gloss-tooltip strong{color:var(--teal-400);}
+
+.accordion-item{border:1px solid var(--line); border-radius:8px; margin-bottom:.6rem; overflow:hidden;}
+.accordion-trigger{
+  width:100%; text-align:left; background:#f8fafc; border:none; padding:.7rem 1rem; font-weight:700;
+  font-size:.9rem; color:var(--navy-800); display:flex; justify-content:space-between; align-items:center;
+}
+.accordion-trigger[aria-expanded="true"]{background:var(--navy-800); color:#fff;}
+.accordion-trigger .chev{transition:transform .2s;}
+.accordion-trigger[aria-expanded="true"] .chev{transform:rotate(180deg);}
+.accordion-panel{padding:0 1rem; max-height:0; overflow:hidden; transition:max-height .3s ease;}
+.accordion-panel.open{padding:.8rem 1rem 1rem; max-height:none;}
+
+table.data{width:100%; border-collapse:collapse; margin:.8rem 0; font-size:.85rem;}
+table.data th, table.data td{border:1px solid var(--line); padding:.45rem .6rem; text-align:left;}
+table.data th{background:var(--navy-800); color:#fff; font-weight:600;}
+table.data tr:nth-child(even){background:#f8fafc;}
+.formula{background:#eef4fb; border-left:4px solid var(--navy-600); padding:.6rem .9rem; font-family:Consolas,monospace; font-size:.88rem; margin:.7rem 0; border-radius:4px; overflow-x:auto;}
+.callout{border-radius:8px; padding:.75rem 1rem; margin:.9rem 0; font-size:.88rem;}
+.callout.warn{background:var(--amber-100); border:1px solid #f2c675; color:#7a4c05;}
+.callout.tip{background:var(--green-100); border:1px solid #98d9ac; color:#155a2d;}
+.callout.info{background:#e0edff; border:1px solid #a9c7f2; color:#1c3f7a;}
+.src-tag{display:inline-block; font-size:.68rem; background:#eef2f7; color:var(--ink-500); border-radius:10px; padding:.1rem .5rem; margin-left:.3rem;}
+.src-tag-note{font-size:.78rem; color:var(--ink-500); display:inline-flex; align-items:baseline; gap:.15rem;}
+
+sup.cite{font-size:.72em; margin-left:.1em;}
+a.cite-link{
+  color:var(--teal-600); font-weight:700; text-decoration:none; padding:0 .1em; border-radius:3px;
+}
+a.cite-link:hover, a.cite-link:focus-visible{background:#dbeeec; text-decoration:underline; color:var(--teal-700,var(--teal-600));}
+
+/* ---------- BIBLIOGRAFÍA ---------- */
+.biblio-section{max-width:var(--maxw); margin:0 auto; padding:0 1.25rem 2rem;}
+.biblio-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.3rem 1.4rem;}
+.biblio-head{display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:.6rem;}
+.biblio-head h2{border:none; margin:0;}
+.biblio-toggle-btn{background:var(--navy-800); color:#fff; border:none; padding:.5rem 1rem; border-radius:6px; font-weight:600; font-size:.82rem;}
+.biblio-download-btn{background:var(--teal-600); color:#fff; border:none; padding:.5rem 1rem; border-radius:6px; font-weight:600; font-size:.82rem; display:inline-flex; align-items:center; gap:.4rem;}
+.biblio-download-btn--alt{background:transparent; color:var(--teal-600); border:1px solid var(--teal-600);}
+.biblio-note{font-size:.85rem; color:var(--ink-700); margin:.2rem 0 1rem;}
+.biblio-list{list-style:none; margin:0; padding:0; display:none;}
+.biblio-list.open{display:block;}
+.biblio-list li{
+  padding:.6rem 0 .6rem 2.2rem; text-indent:-2.2rem; border-bottom:1px dashed var(--line); font-size:.87rem; color:var(--ink-900); line-height:1.5;
+  scroll-margin-top:100px;
+}
+.biblio-list li:last-child{border-bottom:none;}
+.biblio-list li .ref-num{font-weight:700; color:var(--teal-600); margin-right:.3rem;}
+.biblio-list li.flash{background:#fff7d6; transition:background 1.2s ease;}
+.biblio-list a{word-break:break-all;}
+.ref-pdf-row{text-indent:0; margin-top:.5rem;}
+.ref-pdf-link{
+  display:inline-flex; align-items:center; gap:.35rem; text-decoration:none; word-break:normal;
+  background:#eefbf9; border:1px solid var(--teal-500); color:var(--teal-600);
+  font-size:.78rem; font-weight:700; padding:.32rem .75rem; border-radius:14px;
+}
+.ref-pdf-link:hover, .ref-pdf-link:focus-visible{background:var(--teal-500); color:#fff;}
+.ref-pdf-size{font-weight:400; opacity:.85;}
+
+.mark-read-btn{
+  margin-top:1rem; background:var(--teal-600); color:#fff; border:none; padding:.55rem 1.1rem; border-radius:6px; font-weight:600; font-size:.85rem;
+}
+.mark-read-btn[data-done="1"]{background:var(--green-600);}
+
+/* ---------- MODULE 2: PODCAST ---------- */
+.podcast-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.5rem; display:grid; grid-template-columns:110px 1fr; gap:1.3rem; align-items:center;}
+@media(max-width:600px){.podcast-card{grid-template-columns:1fr;}}
+.podcast-art{width:100px; height:100px; border-radius:14px; background:linear-gradient(135deg,var(--teal-500),var(--navy-700)); display:flex; align-items:center; justify-content:center; color:#fff; font-size:2.2rem;}
+audio{width:100%; margin-top:.6rem;}
+.podcast-meta p{margin:.2rem 0;}
+.transcript-note{font-size:.82rem; color:var(--ink-500);}
+
+/* ---------- MODULE 3: FLASHCARDS ---------- */
+.bloom-legend{display:flex; flex-wrap:wrap; gap:.4rem; margin-bottom:1.1rem;}
+.bloom-chip{font-size:.72rem; padding:.25rem .6rem; border-radius:12px; font-weight:700; color:#fff;}
+.cards-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem;}
+.flashcard{
+  perspective:1200px; height:220px;
+}
+.flashcard-inner{
+  position:relative; width:100%; height:100%; transition:transform .55s cubic-bezier(.4,.2,.2,1);
+  transform-style:preserve-3d; border-radius:12px; box-shadow:var(--shadow);
+}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg);}
+.flashcard-face{
+  position:absolute; inset:0; backface-visibility:hidden; border-radius:12px; padding:1rem;
+  display:flex; flex-direction:column; overflow:auto;
+}
+.flashcard-front{background:#fff; border:1px solid var(--line);}
+.flashcard-back{background:var(--navy-900); color:#e7edf7; transform:rotateY(180deg);}
+.card-level{align-self:flex-start; font-size:.66rem; font-weight:700; color:#fff; padding:.2rem .55rem; border-radius:10px; margin-bottom:.5rem;}
+.card-q, .card-a{font-size:.87rem; flex:1;}
+.card-a strong{color:var(--teal-400);}
+.flip-hint{font-size:.7rem; opacity:.7; margin-top:.4rem; text-align:right;}
+.flashcard button.flip-btn{
+  all:unset; display:block; width:100%; height:100%; cursor:pointer;
+}
+
+/* ---------- MODULE 4: SUMMATIVE ---------- */
+.quiz-toolbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:.6rem;}
+.quiz-progress-text{font-size:.85rem; color:var(--ink-700); font-weight:600;}
+.quiz-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.4rem; margin-bottom:1.2rem;}
+.quiz-img-wrap{text-align:center; margin-bottom:1rem;}
+.quiz-img-wrap img{max-height:280px; margin:0 auto; border:1px solid var(--line); border-radius:8px; background:#fff; padding:.4rem;}
+.quiz-options{list-style:none; margin:1rem 0 0; padding:0; display:flex; flex-direction:column; gap:.55rem;}
+.quiz-options li{border:1px solid var(--line); border-radius:8px;}
+.quiz-options label{display:flex; gap:.6rem; padding:.65rem .8rem; cursor:pointer; font-size:.88rem; align-items:flex-start;}
+.quiz-options input{margin-top:.25rem;}
+.quiz-options li.correct{background:var(--green-100); border-color:var(--green-600);}
+.quiz-options li.incorrect{background:var(--red-100); border-color:var(--red-600);}
+.quiz-feedback{margin-top:.9rem; padding:.7rem .9rem; border-radius:8px; font-size:.86rem; display:none; background:#eef2f7; border:1px solid var(--line); color:var(--ink-700);}
+.quiz-feedback.show{display:block;}
+.quiz-feedback.ok{background:var(--green-100); color:#14532d; border:1px solid var(--green-600);}
+.quiz-feedback.bad{background:var(--red-100); color:#7f1d1d; border:1px solid var(--red-600);}
+.quiz-nav-btn{background:var(--navy-800); color:#fff; border:none; padding:.55rem 1.2rem; border-radius:6px; font-weight:600; font-size:.85rem; margin-top:1rem;}
+.quiz-nav-btn:disabled{opacity:.4; cursor:not-allowed;}
+.quiz-results{text-align:center; padding:2rem 1rem;}
+.score-circle{
+  width:140px; height:140px; border-radius:50%; margin:0 auto 1rem; display:flex; align-items:center; justify-content:center;
+  flex-direction:column; background:conic-gradient(var(--teal-500) calc(var(--pct)*1%), #e2e8f0 0); position:relative;
+}
+.score-circle::before{content:""; position:absolute; inset:10px; background:#fff; border-radius:50%;}
+.score-circle span{position:relative; font-size:1.7rem; font-weight:800; color:var(--navy-900);}
+.score-circle small{position:relative; font-size:.75rem; color:var(--ink-500);}
+.reset-btn{background:transparent; border:1px solid var(--navy-700); color:var(--navy-700); padding:.5rem 1rem; border-radius:6px; font-size:.82rem; font-weight:600;}
+.quiz-review-list{display:flex; flex-direction:column; gap:.75rem; margin:1.4rem 0; text-align:left;}
+.quiz-review-item{border:1px solid var(--line); border-radius:8px; padding:.8rem 1rem;}
+.quiz-review-item.correct{border-color:var(--green-600); background:var(--green-100);}
+.quiz-review-item.incorrect{border-color:var(--red-600); background:var(--red-100);}
+.quiz-review-q{margin:0 0 .4rem; font-size:.9rem; font-weight:700; color:var(--navy-900);}
+.quiz-review-a{margin:0 0 .3rem; font-size:.85rem;}
+.quiz-review-a .tag{font-weight:700;}
+.quiz-review-item.correct .quiz-review-a .tag{color:#14532d;}
+.quiz-review-item.incorrect .quiz-review-a .tag{color:#7f1d1d;}
+.quiz-review-correct{margin:0 0 .3rem; font-size:.85rem; color:#14532d;}
+.quiz-review-rationale{margin:0; font-size:.82rem; color:var(--ink-700);}
+
+/* ---------- MODULE 5: TALLER ---------- */
+.case-box{background:linear-gradient(120deg,#eef5ff,#f7fbff); border:1px solid #bcd6f5; border-radius:var(--radius); padding:1.2rem 1.4rem; margin-bottom:1.3rem;}
+.case-box h3{margin-top:0;}
+.vis-badge{display:inline-block; background:var(--red-600); color:#fff; font-size:.72rem; font-weight:700; padding:.15rem .55rem; border-radius:10px; margin-left:.3rem;}
+
+.stepper{display:flex; flex-wrap:wrap; gap:.3rem; margin-bottom:1.2rem;}
+.step-dot{
+  width:30px; height:30px; border-radius:50%; border:2px solid var(--line); background:#fff; font-size:.75rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center; color:var(--ink-500);
+}
+.step-dot.current{border-color:var(--navy-800); color:var(--navy-800); background:#eaf1fb;}
+.step-dot.done{border-color:var(--green-600); background:var(--green-600); color:#fff;}
+
+.workshop-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.4rem;}
+.workshop-hint{background:var(--amber-100); border:1px solid #f2c675; color:#7a4c05; padding:.6rem .9rem; border-radius:8px; font-size:.85rem; margin-top:.8rem; display:none;}
+.workshop-hint.show{display:block;}
+.ts-scenario{background:#f8fafc; border-left:4px solid var(--teal-600); padding:.8rem 1rem; border-radius:6px; margin-bottom:1rem; font-size:.9rem;}
+
+.done-banner{background:var(--green-100); border:1px solid var(--green-600); color:#14532d; padding:1.2rem; border-radius:var(--radius); text-align:center;}
+
+footer.app-footer{background:var(--navy-950); color:#93a5c2; text-align:center; padding:1.4rem; font-size:.75rem;}
+footer.app-footer a{color:#c8d6ec;}
+
+@media (max-width:600px){
+  h1{font-size:1.15rem;}
+  .brand-text h1{font-size:1.05rem;}
+  .brand-text span:not(.brand-credit){display:none;}
+  main{padding:1rem .8rem 3rem;}
+  .fig-card{position:static;}
+}
+
+/* ---------- REGISTRO DE USUARIO (AUTH) ---------- */
+.auth-overlay{
+  position:fixed; inset:0; z-index:500; background:linear-gradient(135deg,var(--navy-950),var(--navy-800));
+  display:flex; align-items:center; justify-content:center; padding:1.5rem; overflow-y:auto;
+}
+.auth-card{
+  background:#fff; border-radius:14px; max-width:440px; width:100%; padding:2rem 1.8rem; box-shadow:0 20px 60px rgba(0,0,0,.4);
+}
+.auth-card .auth-badge{
+  width:52px; height:52px; border-radius:12px; background:var(--teal-500); color:#fff; font-weight:700;
+  display:flex; align-items:center; justify-content:center; margin:0 auto .9rem; font-size:1.2rem;
+}
+.auth-card h2{text-align:center; border:none; margin-bottom:.2rem; font-size:1.25rem;}
+.auth-card .auth-sub{text-align:center; color:var(--ink-500); font-size:.85rem; margin-bottom:1.4rem;}
+.auth-field{margin-bottom:1rem;}
+.auth-field label{display:block; font-size:.82rem; font-weight:700; color:var(--navy-800); margin-bottom:.3rem;}
+.auth-field input{
+  width:100%; padding:.65rem .8rem; border:1px solid var(--line); border-radius:8px; font-size:.92rem; font-family:inherit;
+}
+.auth-field input:focus-visible{border-color:var(--teal-500);}
+.auth-error{background:var(--red-100); color:#7f1d1d; border:1px solid var(--red-600); border-radius:8px; padding:.55rem .8rem; font-size:.82rem; margin-bottom:1rem; display:none;}
+.auth-error.show{display:block;}
+.auth-submit-btn{
+  width:100%; background:var(--teal-600); color:#fff; border:none; padding:.8rem; border-radius:8px; font-weight:700; font-size:.95rem; margin-top:.3rem;
+}
+.auth-note{font-size:.75rem; color:var(--ink-500); text-align:center; margin-top:1rem; line-height:1.5;}
+.auth-admin-link{background:none; border:none; color:var(--teal-600); font-size:.78rem; text-decoration:underline; cursor:pointer; display:block; margin:.8rem auto 0;}
+
+/* ---------- BARRA DE USUARIO (header) ---------- */
+.user-bar{
+  display:flex; align-items:center; gap:.6rem; font-size:.78rem; color:#dbe6f5; flex-wrap:wrap; justify-content:center;
+}
+.user-bar .user-chip{
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); border-radius:20px; padding:.3rem .8rem;
+  display:inline-flex; align-items:center; gap:.4rem;
+}
+.user-switch-btn{background:none; border:none; color:var(--teal-400); font-size:.76rem; text-decoration:underline; cursor:pointer; font-weight:600;}
+
+/* ---------- ADMINISTRADOR ---------- */
+.admin-entry-link{background:none; border:none; color:#93a5c2; font-size:.72rem; text-decoration:underline; cursor:pointer; margin-top:.5rem;}
+.admin-overlay{
+  position:fixed; inset:0; z-index:600; background:rgba(10,24,48,.85); display:flex; align-items:flex-start; justify-content:center;
+  padding:2.5rem 1.25rem; overflow-y:auto;
+}
+.admin-login-card{background:#fff; border-radius:14px; max-width:400px; width:100%; padding:2rem 1.8rem; margin-top:2rem; box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.admin-dashboard{background:#fff; border-radius:14px; max-width:980px; width:100%; padding:1.6rem 1.8rem 2.2rem; box-shadow:0 20px 60px rgba(0,0,0,.4);}
+.admin-dash-head{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.6rem; border-bottom:2px solid var(--line); padding-bottom:.8rem; margin-bottom:1rem;}
+.admin-dash-head h2{border:none; margin:0;}
+.admin-toolbar{display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1.2rem;}
+.admin-btn{background:var(--navy-800); color:#fff; border:none; padding:.5rem .9rem; border-radius:6px; font-weight:600; font-size:.8rem; cursor:pointer;}
+.admin-btn.alt{background:transparent; color:var(--navy-800); border:1px solid var(--navy-800);}
+.admin-btn.danger{background:var(--red-600);}
+.admin-empty{color:var(--ink-500); font-size:.9rem; padding:2rem 0; text-align:center;}
+.admin-user-card{border:1px solid var(--line); border-radius:10px; margin-bottom:1rem; overflow:hidden;}
+.admin-user-head{
+  background:#f8fafc; padding:.8rem 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.5rem; cursor:pointer;
+}
+.admin-user-id{font-weight:700; color:var(--navy-900); font-size:.92rem;}
+.admin-user-meta{font-size:.76rem; color:var(--ink-500);}
+.admin-user-stats{display:flex; gap:.4rem; flex-wrap:wrap;}
+.admin-stat-pill{font-size:.72rem; font-weight:700; padding:.2rem .6rem; border-radius:12px; background:#eef2f7; color:var(--navy-700);}
+.admin-stat-pill.ok{background:var(--green-100); color:#14532d;}
+.admin-stat-pill.warn{background:var(--amber-100); color:#7a4c05;}
+.admin-user-body{display:none; padding:0 1rem 1rem;}
+.admin-user-body.open{display:block;}
+.admin-table{width:100%; border-collapse:collapse; font-size:.82rem; margin:.6rem 0 1.1rem;}
+.admin-table th, .admin-table td{border:1px solid var(--line); padding:.4rem .55rem; text-align:left; vertical-align:top;}
+.admin-table th{background:var(--navy-800); color:#fff; font-weight:600; font-size:.76rem;}
+.admin-table td.ans-correct{background:var(--green-100);}
+.admin-table td.ans-incorrect{background:var(--red-100);}
+.admin-badge{display:inline-block; font-size:.68rem; font-weight:700; padding:.1rem .45rem; border-radius:8px;}
+.admin-badge.ok{background:var(--green-600); color:#fff;}
+.admin-badge.bad{background:var(--red-600); color:#fff;}
+.admin-badge.pending{background:#cbd5e1; color:#334155;}
+.admin-subheading{font-size:.85rem; font-weight:700; color:var(--teal-600); margin:1rem 0 .3rem;}
+.admin-file-input{display:none;}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Saltar al contenido principal</a>
+
+<div id="auth-overlay-root"></div>
+
+<div id="app-shell" hidden>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-badge" aria-hidden="true">TRRC</div>
+      <div class="brand-text">
+        <h1>Terapias de reemplazo renal continuas</h1>
+        <span>Subespecialidad de Cuidado Intensivo Pediátrico</span>
+        <span class="brand-credit">Hernán Herrera · Versión 1 · 2026</span>
+      </div>
+    </div>
+    <div class="global-progress" role="group" aria-label="Progreso general del curso">
+      <div class="gp-label"><span>Progreso general</span><span id="gp-percent">0%</span></div>
+      <div class="gp-track"><div class="gp-fill" id="gp-fill"></div></div>
+    </div>
+    <div class="user-bar" id="user-bar"></div>
+  </div>
+</header>
+
+<nav class="module-nav" aria-label="Navegación entre módulos">
+  <div class="module-nav-inner" role="tablist" id="module-tablist">
+    <button class="mod-btn" role="tab" data-module="m1" aria-selected="true" id="tab-m1"><span class="num">1</span> Contenido <span class="check" id="check-m1" hidden>✓</span></button>
+    <button class="mod-btn" role="tab" data-module="m2" aria-selected="false" id="tab-m2"><span class="num">2</span> Podcast <span class="check" id="check-m2" hidden>✓</span></button>
+    <button class="mod-btn" role="tab" data-module="m3" aria-selected="false" id="tab-m3"><span class="num">3</span> Autoevaluación <span class="check" id="check-m3" hidden>✓</span></button>
+    <button class="mod-btn" role="tab" data-module="m4" aria-selected="false" id="tab-m4"><span class="num">4</span> Evaluación sumativa <span class="check" id="check-m4" hidden>✓</span></button>
+    <button class="mod-btn" role="tab" data-module="m5" aria-selected="false" id="tab-m5"><span class="num">5</span> Taller práctico <span class="check" id="check-m5" hidden>✓</span></button>
+  </div>
+</nav>
+
+<main id="main-content">
+
+<!-- ======================= MÓDULO 1: CONTENIDO ======================= -->
+<section class="module-panel active" id="panel-m1" role="tabpanel" aria-labelledby="tab-m1">
+  <div class="module-intro">
+    <h2>Módulo 1 · Contenido</h2>
+  </div>
+
+  <div class="section-tablist" role="tablist" id="section-tablist" aria-label="Secciones del contenido"></div>
+  <div id="content-sections"></div>
+</section>
+
+<!-- ======================= MÓDULO 2: PODCAST ======================= -->
+<section class="module-panel" id="panel-m2" role="tabpanel" aria-labelledby="tab-m2">
+  <div class="module-intro">
+    <h2>Módulo 2 · Podcast</h2>
+  </div>
+  <div class="podcast-card">
+    <div class="podcast-art" aria-hidden="true">🎧</div>
+    <div class="podcast-meta">
+      <h3 style="margin-top:0">Soporte renal y sobrecarga hídrica pediátrica</h3>
+      <p class="transcript-note">Formato: audio (.m4a) · Reproductor nativo del navegador · No requiere conexión a internet.</p>
+      <audio id="podcast-audio" controls preload="none">
+        <source src="podcast/Soporte_renal_y_sobrecarga_h%C3%ADdrica_pedi%C3%A1trica.m4a" type="audio/mp4">
+        Su navegador no soporta la reproducción de audio incorporada. Puede abrir el archivo directamente desde la carpeta "podcast".
+      </audio>
+      <p class="transcript-note" id="podcast-status">El progreso se marca automáticamente al reproducir el audio.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= MÓDULO 3: FLASHCARDS ======================= -->
+<section class="module-panel" id="panel-m3" role="tabpanel" aria-labelledby="tab-m3">
+  <div class="module-intro">
+    <h2>Módulo 3 · Autoevaluación formativa</h2>
+  </div>
+  <div class="bloom-legend" id="bloom-legend"></div>
+  <div class="cards-grid" id="cards-grid"></div>
+</section>
+
+<!-- ======================= MÓDULO 4: SUMATIVA ======================= -->
+<section class="module-panel" id="panel-m4" role="tabpanel" aria-labelledby="tab-m4">
+  <div class="module-intro">
+    <h2>Módulo 4 · Evaluación sumativa</h2>
+  </div>
+  <div id="quiz-container"></div>
+</section>
+
+<!-- ======================= MÓDULO 5: TALLER ======================= -->
+<section class="module-panel" id="panel-m5" role="tabpanel" aria-labelledby="tab-m5">
+  <div class="module-intro">
+    <h2>Módulo 5 · Taller práctico — Caso clínico</h2>
+  </div>
+  <div class="case-box">
+    <h3>Caso clínico</h3>
+    <p id="case-text"></p>
+  </div>
+  <div id="workshop-root"></div>
+</section>
+
+</main>
+
+<section class="biblio-section" id="bibliografia" aria-label="Bibliografía">
+  <div class="biblio-card">
+    <div class="biblio-head">
+      <h2>Referencias bibliográficas</h2>
+      <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+        <button class="biblio-toggle-btn" id="biblio-toggle-btn" aria-expanded="false" aria-controls="biblio-list">Mostrar / ocultar</button>
+        <button class="biblio-download-btn" id="biblio-pdf-btn">⬇ Descargar como PDF</button>
+        <button class="biblio-download-btn biblio-download-btn--alt" id="biblio-download-btn">⬇ Descargar como texto (.txt)</button>
+      </div>
+    </div>
+    <p class="biblio-note">Las citas dentro del contenido se identifican con números entre corchetes (p. ej. [3]); cada número remite a la referencia correspondiente en esta lista, ordenada alfabéticamente y formateada según las normas APA (7.ª edición). Al hacer clic en una cita del texto, esta sección se abre y se resalta la referencia. Los botones superiores descargan el <strong>listado completo</strong> de referencias (como PDF mediante el diálogo de impresión, o como texto plano). Cada referencia incluye además su propio botón «📄 Descargar PDF original», que entrega el artículo o documento fuente tal como fue suministrado, sin necesidad de conexión a internet.</p>
+    <ol class="biblio-list" id="biblio-list"></ol>
+  </div>
+</section>
+
+<footer class="app-footer">
+  <p>Aplicación educativa autocontenida · Contenido derivado exclusivamente de los artículos, gráficos, podcast e imágenes suministrados · Uso académico para fellows de UCIP</p>
+  <p>Autor: Hernán Herrera · Versión 1 · 2026</p>
+  <button class="admin-entry-link" id="admin-entry-btn" type="button">Panel de administrador</button>
+</footer>
+
+</div><!-- /#app-shell -->
+
+<div id="admin-overlay-root"></div>
+
+<div class="gloss-tooltip" id="gloss-tooltip" role="tooltip"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   0. ESTADO Y PERSISTENCIA (localStorage) — por usuario registrado
+   ============================================================ */
+const REGISTRY_KEY = "trrc_user_registry_v1";
+const CURRENT_USER_KEY = "trrc_current_user_v1";
+const ADMIN_SESSION_KEY = "trrc_admin_auth_v1";
+const ADMIN_PASSWORD = "UCIP-Renal-2026";
+
+/* ============================================================
+   SINCRONIZACIÓN EN LA NUBE (opcional, Google Sheets + Apps Script)
+   La app funciona 100% sin conexión si deja SHEETS_API_URL vacío
+   (todo se guarda solo en este navegador, como hasta ahora).
+   Para centralizar los registros entre varios computadores, pegue
+   aquí la URL de su Web App de Apps Script (ver instrucciones del
+   autor / archivo AppsScript_Backend_TRRC.gs.txt). Ejemplo:
+   "https://script.google.com/macros/s/AKfycb.../exec"
+   ============================================================ */
+const SHEETS_API_URL = "https://script.google.com/macros/s/AKfycbzIrEk_YjcVEURHfCs-7JWBCpuOb-4sF1JDY0OAP1Ki7j4wp-hXAKecI6w_CFp3wLrV/exec";
+
+function cloudSyncEnabled(){ return !!SHEETS_API_URL; }
+
+/* Envía un evento a la nube sin bloquear la app ni mostrar errores
+   al usuario: si no hay internet o no está configurado, la app
+   sigue funcionando normalmente solo con localStorage. */
+function cloudPost(action, payload){
+  if(!cloudSyncEnabled() || typeof fetch !== "function") return;
+  try{
+    fetch(SHEETS_API_URL, {
+      method: "POST",
+      headers: {"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({action:action, payload:payload})
+    }).catch(function(){ /* offline o sin CORS: se queda en local */ });
+  }catch(e){}
+}
+
+function cloudGetAll(){
+  if(!cloudSyncEnabled() || typeof fetch !== "function") return Promise.resolve(null);
+  const url = SHEETS_API_URL + "?action=getAll&key=" + encodeURIComponent(ADMIN_PASSWORD);
+  return fetch(url).then(function(r){ return r.json(); }).catch(function(){ return null; });
+}
+
+function userProgressKey(userId){ return "trrc_progress_v1__" + userId; }
+
+function defaultUserState(){
+  return {
+    m1_sections_read: {},
+    m2_played: false,
+    m3_cards_flipped: {},
+    m4_answers: {},
+    m4_completed: false,
+    m4_completedAt: null,
+    m5_steps_done: {},
+    m5_attempts: {},
+    m5_ts_done: {},
+    m5_ts_attempts: {}
+  };
+}
+
+function loadState(userId){
+  try{
+    const raw = localStorage.getItem(userProgressKey(userId));
+    if(raw){
+      const parsed = JSON.parse(raw);
+      // completar campos que puedan faltar si el registro es de una versión anterior
+      const base = defaultUserState();
+      return Object.assign(base, parsed);
+    }
+  }catch(e){}
+  return defaultUserState();
+}
+
+let CURRENT_USER_ID = null;
+let STATE = defaultUserState();
+
+function saveState(){
+  if(!CURRENT_USER_ID) return;
+  try{ localStorage.setItem(userProgressKey(CURRENT_USER_ID), JSON.stringify(STATE)); }catch(e){}
+  updateGlobalProgress();
+}
+
+/* ---------- Registro de usuarios (fellows) ---------- */
+function getRegistry(){
+  try{
+    const raw = localStorage.getItem(REGISTRY_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return {};
+}
+function saveRegistry(reg){
+  try{ localStorage.setItem(REGISTRY_KEY, JSON.stringify(reg)); }catch(e){}
+}
+function normalizeEmail(email){ return String(email||"").trim().toLowerCase(); }
+
+function upsertUser(profile){
+  const reg = getRegistry();
+  const id = normalizeEmail(profile.email);
+  const now = new Date().toISOString();
+  if(reg[id]){
+    reg[id].name = profile.name || reg[id].name;
+    reg[id].idRotation = profile.idRotation || reg[id].idRotation;
+    reg[id].lastActiveAt = now;
+  } else {
+    reg[id] = {
+      id: id,
+      name: profile.name,
+      email: profile.email,
+      idRotation: profile.idRotation,
+      registeredAt: now,
+      lastActiveAt: now
+    };
+  }
+  saveRegistry(reg);
+  cloudPost("upsertUser", {id:id, name:reg[id].name, email:reg[id].email, idRotation:reg[id].idRotation, registeredAt:reg[id].registeredAt});
+  return id;
+}
+
+function getCurrentUserId(){
+  try{ return localStorage.getItem(CURRENT_USER_KEY); }catch(e){ return null; }
+}
+function setCurrentUserId(id){
+  try{
+    if(id) localStorage.setItem(CURRENT_USER_KEY, id);
+    else localStorage.removeItem(CURRENT_USER_KEY);
+  }catch(e){}
+}
+
+/* ============================================================
+   1. GLOSARIO
+   ============================================================ */
+const GLOSSARY = {
+  "FF": "Fracción de Filtración: porcentaje del agua plasmática que se filtra al pasar por la membrana respecto al volumen acuoso que entra al filtro. Objetivo &lt;20-25% para evitar coagulación del filtro.",
+  "PTM": "Presión Transmembrana: calculada a partir de las presiones prefiltro, retorno y del puerto de ultrafiltración; indica la capacidad del filtro para ultrafiltrar. Un aumento rápido señala coagulación de la membrana.",
+  "iCa": "Calcio iónico (ionizado): fracción activa del calcio plasmático (~50% del calcio total). Se mide en el circuito (posfiltro) y en el paciente (sistémico) durante la anticoagulación con citrato.",
+  "RCA": "Regional Citrate Anticoagulation (anticoagulación regional con citrato): estrategia que anticoagula solo el circuito extracorpóreo mediante quelación del calcio con citrato.",
+  "VEC": "Volumen Extracorpóreo o del circuito: volumen de sangre contenido en el catéter, las líneas y el filtro. No debería superar el 10% de la volemia del paciente.",
+  "%FO": "Porcentaje de sobrecarga hídrica (Fluid Overload): (líquidos administrados − líquidos eliminados) / peso de admisión a UCIP × 100.",
+  "Qb": "Flujo de sangre (Blood Flow): velocidad a la que la bomba extrae y hace circular la sangre del paciente por el circuito, expresada en mL/min o mL/kg/min.",
+  "Qeff": "Dosis de efluente: suma del flujo de dializado (aclaramiento difusivo) y del flujo de reposición (aclaramiento convectivo); equivale a la dosis entregada de TRRC.",
+  "SCUF": "Ultrafiltración lenta continua: solo ultrafiltración, sin líquido de reposición ni de diálisis; retira exclusivamente exceso de volumen.",
+  "CVVH": "Hemofiltración venovenosa continua: depuración por convección, con líquido de reposición pre o posfiltro.",
+  "CVVHD": "Hemodiálisis venovenosa continua: depuración por difusión, con dializado a contracorriente del flujo sanguíneo.",
+  "CVVHDF": "Hemodiafiltración venovenosa continua: combina difusión y convección (dializado + líquido de reposición); modalidad utilizada en este curso.",
+  "tCa/iCa": "Relación calcio total / calcio iónico: marcador subrogado de acumulación de citrato cuando es mayor a 2.5. Debe calcularse con calcio total, nunca con \"calcio corregido\".",
+  "Fr (French)": "Unidad de calibre de catéteres (French); 1 Fr equivale a 1/3 de milímetro de diámetro externo.",
+  "Bradiquinina": "Péptido vasoactivo cuya liberación puede desencadenarse al cebar con sangre ácida circuitos con membranas de acrilonitrilo (AN-69), produciendo un síndrome potencialmente grave en el lactante.",
+  "AN-69": "Acrilonitrilo 69: material de membrana usado en algunos sets Prismaflex (M60/M100/M150); su carga negativa permite adsorción de citoquinas pero se asocia a riesgo de síndrome de liberación de bradiquinina con cebado sanguíneo ácido.",
+  "Predilución": "Administración del líquido de reposición a la sangre antes de que esta entre al filtro (prefiltro), lo que reduce la hemoconcentración y la coagulación.",
+  "Postdilución": "Administración del líquido de reposición a la sangre después del filtro (posfiltro); más eficiente para el aclaramiento pero con mayor riesgo de coagulación si es la única fracción.",
+  "Cebado": "Priming: llenado inicial del circuito extracorpóreo con una solución (cristaloide, albúmina o sangre) antes de conectarlo al paciente.",
+  "KDIGO": "Kidney Disease: Improving Global Outcomes — grupo de guías de práctica clínica de referencia en lesión renal aguda y TRRC.",
+  "ATIII": "Antitrombina III: cofactor plasmático necesario para que la heparina inhiba el factor Xa y la trombina. Debe mantenerse por encima del 100%; su déficit (frecuente en el neonato) reduce la eficacia anticoagulante de la heparina."
+};
+
+function initGlossary(){
+  const tooltip = document.getElementById("gloss-tooltip");
+  document.querySelectorAll("dfn.gloss").forEach(function(el){
+    el.setAttribute("tabindex","0");
+    el.setAttribute("role","button");
+    el.setAttribute("aria-haspopup","true");
+    function toggle(e){
+      e.stopPropagation();
+      const term = el.getAttribute("data-term");
+      const def = GLOSSARY[term] || "Definición no disponible.";
+      if(tooltip.classList.contains("show") && tooltip.dataset.term === term){
+        tooltip.classList.remove("show");
+        return;
+      }
+      tooltip.innerHTML = "<strong>"+term+"</strong><br>"+def;
+      tooltip.dataset.term = term;
+      const rect = el.getBoundingClientRect();
+      let top = rect.bottom + 8;
+      let left = rect.left;
+      if(left + 280 > window.innerWidth) left = window.innerWidth - 290;
+      if(top + 140 > window.innerHeight) top = rect.top - 130;
+      tooltip.style.top = Math.max(8,top)+"px";
+      tooltip.style.left = Math.max(8,left)+"px";
+      tooltip.classList.add("show");
+    }
+    el.addEventListener("click", toggle);
+    el.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(e);} });
+  });
+  document.addEventListener("click", function(){ tooltip.classList.remove("show"); });
+}
+function gl(term, display){
+  return '<dfn class="gloss" data-term="'+term+'">'+(display||term)+'</dfn>';
+}
+
+/* ============================================================
+   2. NAVEGACIÓN ENTRE MÓDULOS (SPA, sin recarga)
+   ============================================================ */
+const modules = ["m1","m2","m3","m4","m5"];
+function showModule(id){
+  modules.forEach(function(m){
+    document.getElementById("panel-"+m).classList.toggle("active", m===id);
+    const tab = document.getElementById("tab-"+m);
+    tab.setAttribute("aria-selected", m===id ? "true":"false");
+  });
+  const mainEl = document.getElementById("main-content");
+  if(mainEl && typeof mainEl.scrollIntoView === "function"){
+    try{ mainEl.scrollIntoView({behavior:"smooth", block:"start"}); }catch(e){ try{ mainEl.scrollIntoView(true); }catch(e2){} }
+  }
+}
+document.getElementById("module-tablist").addEventListener("click", function(e){
+  const btn = e.target.closest(".mod-btn");
+  if(!btn) return;
+  showModule(btn.getAttribute("data-module"));
+});
+document.getElementById("module-tablist").addEventListener("keydown", function(e){
+  const tabs = Array.from(document.querySelectorAll(".mod-btn"));
+  const idx = tabs.indexOf(document.activeElement);
+  if(idx<0) return;
+  if(e.key==="ArrowRight"){ e.preventDefault(); tabs[(idx+1)%tabs.length].focus(); }
+  if(e.key==="ArrowLeft"){ e.preventDefault(); tabs[(idx-1+tabs.length)%tabs.length].focus(); }
+});
+
+/* ============================================================
+   3. PROGRESO GLOBAL
+   ============================================================ */
+function updateGlobalProgress(){
+  const m1total = CONTENT_SECTIONS.length;
+  const m1done = Object.keys(STATE.m1_sections_read).filter(k=>STATE.m1_sections_read[k]).length;
+  const m1pct = m1total ? m1done/m1total : 0;
+
+  const m2pct = STATE.m2_played ? 1 : 0;
+
+  const m3total = FLASHCARDS.length;
+  const m3done = Object.keys(STATE.m3_cards_flipped).filter(k=>STATE.m3_cards_flipped[k]).length;
+  const m3pct = m3total ? m3done/m3total : 0;
+
+  const m4pct = STATE.m4_completed ? 1 : 0;
+
+  const m5total = WORKSHOP_STEPS.length + TROUBLESHOOT.length;
+  const m5done = Object.keys(STATE.m5_steps_done).filter(k=>STATE.m5_steps_done[k]).length +
+                 Object.keys(STATE.m5_ts_done).filter(k=>STATE.m5_ts_done[k]).length;
+  const m5pct = m5total ? m5done/m5total : 0;
+
+  const overall = Math.round(((m1pct+m2pct+m3pct+m4pct+m5pct)/5)*100);
+  document.getElementById("gp-fill").style.width = overall+"%";
+  document.getElementById("gp-percent").textContent = overall+"%";
+
+  document.getElementById("check-m1").hidden = m1pct<1;
+  document.getElementById("check-m2").hidden = m2pct<1;
+  document.getElementById("check-m3").hidden = m3pct<1;
+  document.getElementById("check-m4").hidden = m4pct<1;
+  document.getElementById("check-m5").hidden = m5pct<1;
+}
+
+/* ============================================================
+   4. MÓDULO 1 — DATOS DE CONTENIDO
+   Todo el texto proviene de los artículos de "articulos".
+   Fuentes citadas con etiqueta corta entre paréntesis.
+   ============================================================ */
+const IMG = "imagenes/";
+const CONTENT_SECTIONS = [
+{
+  id:"fundamentos",
+  tab:"Fundamentos físicos",
+  title:"Fundamentos físicos de la depuración",
+  figure:{src:"Principios%20fisicos%20de%20convecci%C3%B3n%20y%20difusi%C3%B3n.png", alt:"Cuatro paneles esquemáticos que ilustran difusión, ultrafiltración, convección y adsorción a través de una membrana de fibra hueca.", caption:"Fig. 1 — Principios físicos que gobiernan la depuración en TRRC: difusión, ultrafiltración, convección y adsorción."},
+  html:`
+    <p>Las modalidades de TRRC combinan cuatro principios de transporte —difusión, ultrafiltración, convección y adsorción— cuya comprensión sustenta la prescripción y el control de la membrana <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+    <div class="accordion-item">
+      <button class="accordion-trigger" aria-expanded="false">Difusión <span class="chev">▾</span></button>
+      <div class="accordion-panel"><p>Proceso por el cual los solutos pasan a través de una membrana permeable de un área de mayor concentración a una de menor concentración, mediante movimientos moleculares aleatorios, hasta lograr el equilibrio. La transición dependerá del gradiente de concentración, la superficie de la membrana y su permeabilidad. Mediante difusión se eliminan de modo efectivo moléculas de bajo peso molecular <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>.</p></div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-trigger" aria-expanded="false">Ultrafiltración <span class="chev">▾</span></button>
+      <div class="accordion-panel"><p>Movimiento de líquidos a través de una membrana semipermeable, impulsado por un gradiente de presión; algunos solutos de bajo peso molecular pueden acompañar el agua plasmática ultrafiltrada según su tamaño <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>. La fuerza que evita el flujo del solvente del lado de menor al de mayor concentración de solutos es la presión osmótica (presión oncótica para el agua) <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>.</p></div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-trigger" aria-expanded="false">Convección <span class="chev">▾</span></button>
+      <div class="accordion-panel"><p>Movimiento en masa de moléculas a través de una membrana semipermeable de alto flujo. Consiste en la remoción de solutos mediante su "arrastre" (solvent drag) en el ultrafiltrado a través de una membrana de alta permeabilidad; el agua plasmática ultrafiltrada se repone simultáneamente con líquido de reposición. Los solutos eliminados por convección incluyen peso molecular bajo y medio <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>. Las técnicas convectivas ofrecen eliminación mejorada de solutos de peso molecular medio como mediadores inflamatorios, lo que puede ser beneficioso en el paciente crítico <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup>.</p></div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-trigger" aria-expanded="false">Adsorción <span class="chev">▾</span></button>
+      <div class="accordion-panel"><p>Adhesión selectiva de moléculas a la pared de la membrana del filtro, según propiedades físico-químicas desarrolladas específicamente para lograr dicho efecto; contribuye al aclaramiento de moléculas de tamaño medio y grande <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>. La membrana AN-69, cargada negativamente, puede unir moléculas cargadas positivamente como citoquinas, facilitando su depuración <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>.</p></div>
+    </div>
+    <h3>Escala de tamaño molecular</h3>
+    <p>La cinética de membrana depende del tamaño de poro en relación con el tamaño molecular: los solutos pequeños (Na 23, K 35, urea 60, creatinina 113, fosfato 80 Da) atraviesan poros pequeños; las moléculas medianas (vitamina B12 1355, inulina 5200, β2-microglobulina 11 800 Da) requieren convección o poros mayores; y la albúmina (55 000–60 000 Da) debe ser retenida. Esto corresponde al concepto de punto de corte: el peso molecular del soluto con coeficiente de cribado 0.1 <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+    <figure style="margin:1rem 0 0">
+      <img src="${IMG}Tama%C3%B1o%20de%20mol%C3%A9culas%20en%20di%C3%A1lisis.png" alt="Escala de pesos moleculares en Daltons desde sodio (23 Da) hasta albúmina (55.000-60.000 Da), con esquema de poro de membrana reteniendo moléculas grandes." loading="lazy">
+      <figcaption style="font-size:.78rem;color:var(--ink-500);margin-top:.4rem">Fig. 7 — Escala de tamaño molecular y su relación con el tamaño de poro de la membrana.</figcaption>
+    </figure>
+    <h3>Funcionamiento del hemofiltro</h3>
+    <p>El hemofiltro está formado por fibras huecas: la sangre entra por su extremo inferior y sale por el superior, mientras el dializado circula a contracorriente (interior de la fibra = sangre; exterior = dializado) <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+    <figure style="margin:1rem 0 0">
+      <img src="${IMG}Funcionamiento%20del%20filtro.png" alt="Corte longitudinal y transversal de un hemofiltro de fibra hueca: la sangre entra por abajo y sale por arriba, el dializado circula en contracorriente por fuera de las fibras." loading="lazy">
+      <figcaption style="font-size:.78rem;color:var(--ink-500);margin-top:.4rem">Fig. 8 — Funcionamiento del hemofiltro de fibra hueca.</figcaption>
+    </figure>
+    <div class="callout info"><strong>Filtros:</strong> membranas semipermeables con capacidad para remover solutos durante la TRRC. Su elección depende de la biocompatibilidad, permeabilidad, grosor, tamaño de poro, carga y propiedades adsortivas <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>. Materiales más usados: polisulfona, poliamida, acrilonitrilos y polietersulfonas <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>.</div>
+  `
+},
+{
+  id:"indicaciones",
+  tab:"Indicaciones y momento",
+  title:"Indicaciones y momento de inicio",
+  figure:{src:"Diagramas%20esquem%C3%A1ticos%20de%20terapia%20de%20reemplazo%20renal%20continua.png", alt:"Cuatro diagramas esquemáticos comparando las modalidades SCUF, CVVH, CVVHD y CVVHDF de terapia de reemplazo renal continua.", caption:"Fig. 10 — Modalidades de TRRC: SCUF, CVVH, CVVHD y CVVHDF."},
+  html:`
+    <h3>Indicaciones renales y no renales</h3>
+    <p>Las indicaciones más frecuentes de TRRC en niños críticos son la lesión renal aguda (LRA) y la sobrecarga hídrica (FO); también existen indicaciones no renales como la eliminación de metabolitos tóxicos en falla hepática aguda, errores innatos del metabolismo, intoxicaciones, y la remoción de mediadores inflamatorios en sepsis <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup>. Otras indicaciones descritas: insuficiencia cardíaca congestiva y cirugía cardíaca refractarias, encefalopatía hepática, intoxicaciones por procainamida/litio/salicilatos/medio de contraste, acidosis láctica y metabólica (pH&lt;7.0), hiperkalemia e hipernatremia severas, hipertermia/hipotermia refractarias, grandes quemados, oliguria/anuria persistentes, rabdomiólisis y uremia sintomática <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>.</p>
+    <table class="data">
+      <caption style="text-align:left;font-size:.8rem;color:var(--ink-500);margin-bottom:.3rem">Indicaciones más comunes para iniciar TRRC (ESPNIC 2024)</caption>
+      <tr><th>Categoría</th><th>Indicación</th></tr>
+      <tr><td>Renal</td><td>LRA con oligo/anuria (&lt;0.5 mL/kg/h)</td></tr>
+      <tr><td>Renal</td><td>Sobrecarga hídrica &gt;10%</td></tr>
+      <tr><td>Renal</td><td>Alteración electrolítica grave refractaria a tratamiento médico</td></tr>
+      <tr><td>Metabólica</td><td>Alteraciones metabólicas (p. ej. hiperamonemia) refractarias</td></tr>
+      <tr><td>Ácido-base</td><td>Acidosis metabólica severa</td></tr>
+      <tr><td>Urémica</td><td>Complicaciones urémicas (encefalopatía, derrame pericárdico, edema pulmonar)</td></tr>
+      <tr><td>Tóxica</td><td>Intoxicaciones (fármacos y toxinas)</td></tr>
+      <tr><td>Séptica</td><td>Choque séptico con necesidad de depuración de toxinas</td></tr>
+      <tr><td>Soporte</td><td>Necesidad de crear espacio para líquidos de fármacos y/o nutrición</td></tr>
+    </table>
+    <h3>Sobrecarga hídrica y momento de inicio</h3>
+    <div class="formula">% sobrecarga (FO) = (Líquidos administrados − Líquidos eliminados) / Peso de admisión a UCIP × 100</div>
+    <p>La mortalidad aumenta cuando la sobrecarga es &gt;10-15%, con un incremento reportado de ~3% en la mortalidad por cada 1% de aumento de la sobrecarga <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>, y hasta 6% de aumento en las probabilidades de mortalidad por cada 1% de ${gl("%FO","FO")} según otra fuente <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup>. La mayoría de expertos recomienda considerar el inicio de TRRC en niños críticos con FO &gt;10% cuando los diuréticos no logran revertir o mantener el balance hídrico <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup>. En niños oligoanúricos puede requerirse iniciar con menor grado de sobrecarga para "crear espacio" para soporte nutricional y farmacológico <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+    <div class="callout warn"><strong>Controversia de temporalidad:</strong> el momento óptimo de inicio sigue sin consenso. Una iniciación temprana podría mejorar desenlaces en pacientes de alto riesgo, pero expone a mayores complicaciones de una terapia invasiva; una estrategia más conservadora de "esperar y observar" evita el sobretratamiento en pacientes que podrían recuperarse sin TRRC <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup>.</div>
+    <h3>Modalidades de TRRC</h3>
+    <p>Existen cuatro modalidades: SCUF (${gl("SCUF")}), CVVH (${gl("CVVH")}), CVVHD (${gl("CVVHD")}) y CVVHDF (${gl("CVVHDF")}); todas emplean un circuito extracorpóreo desde una vena central hasta una vía central <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>. La CVVHDF combina los mecanismos de difusión y convección, permitiendo remover moléculas de mediano y bajo peso; es útil en LRA inducida por trauma (rabdomiólisis), sepsis y falla orgánica múltiple <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>. Es la modalidad técnicamente más compleja de TRRC, con circuito complejo, cambios frecuentes de bolsas y alto costo, pero ofrece el espectro terapéutico más amplio <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup>.</p>
+    <table class="data">
+      <tr><th>Modalidad</th><th>Mecanismo</th><th>Solución de tratamiento</th></tr>
+      <tr><td>SCUF</td><td>Ultrafiltración</td><td>No</td></tr>
+      <tr><td>CVVH</td><td>Convección</td><td>30–4000 mL/h</td></tr>
+      <tr><td>CVVHD</td><td>Difusión</td><td>No</td></tr>
+      <tr><td>CVVHDF</td><td>Difusión y convección</td><td>70–4000 mL/h</td></tr>
+    </table>
+    <span class="src-tag-note">Tabla adaptada de <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup></span>
+  `
+},
+{
+  id:"acceso",
+  tab:"Acceso vascular",
+  title:"Accesos vasculares y catéteres",
+  figure:{src:"Cateter.png", alt:"Fotografía de un catéter venoso central de doble lumen para TRRC pediátrica, con clamp rojo (luz arterial) y clamp azul (luz venosa), longitud aproximada de 16 cm.", caption:"Catéter físico de doble lumen con clamps arterial (rojo) y venoso (azul)."},
+  html:`
+    <h3>Física del catéter: calibre, longitud y resistencia</h3>
+    <p>El acceso vascular es uno de los aspectos más importantes de la prescripción: determina la tasa de aclaramiento y previene tanto la pérdida de sangre como la coagulación del circuito por flujo insuficiente. La disfunción del catéter se manifiesta como flujos sanguíneos insuficientes, coagulación repetida del circuito y acortamiento del tiempo de terapia <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+    <p>La resistencia del catéter al flujo obedece a la ley de Poiseuille: el flujo es proporcional a la cuarta potencia del radio interno e inversamente proporcional a la longitud y a la viscosidad de la sangre.</p>
+    <div class="formula">Q = (π · ΔP · r⁴) / (8 · η · L)</div>
+    <p>La dependencia de r⁴ explica por qué un pequeño aumento del calibre interno mejora notablemente el flujo, y por qué un catéter más largo —necesario para posicionar la punta en la unión cavo-atrial o en la vena cava inferior— incrementa la resistencia <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>. El cociente diámetro-catéter/diámetro-vaso no debe superar 0.45 (45%) para prevenir trombosis venosa central <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup>.</p>
+    <figure style="margin:1rem 0">
+      <img src="${IMG}Flujos%20por%20cateter.png" alt="Nomenclatura funcional del catéter de doble luz: la luz roja marcada 'arterial' extrae sangre del paciente; la luz azul marcada 'venosa' la retorna." loading="lazy">
+      <figcaption style="font-size:.78rem;color:var(--ink-500);margin-top:.4rem">Fig. 2 — En el catéter de doble luz, el lumen "arterial" (rojo) extrae sangre hacia el circuito y el "venoso" (azul) la retorna al paciente. Las puntas se escalonan (&gt;3 cm de separación) para minimizar la recirculación (&lt;5%).</figcaption>
+    </figure>
+    <h3>Selección del sitio anatómico</h3>
+    <p>Jerarquía de preferencia: <strong>yugular interna derecha &gt; femoral &gt; yugular interna izquierda &gt; subclavia</strong> <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>. La yugular interna derecha tiene un trayecto recto hacia la aurícula derecha, con menor contacto con la pared del vaso, mejor flujo y menor riesgo de trombosis asociada a catéter. La femoral es de acceso fácil y rápido, buena opción en pediatría y preferida ante coagulopatía, aunque limita la movilización e incrementa la recirculación. La subclavia debe evitarse por mayor riesgo de estenosis venosa central, que puede impedir accesos futuros para hemodiálisis de mantenimiento <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup>. En neonatos y lactantes pequeños, la vena braquiocefálica izquierda (abordaje ecoguiado) es una alternativa por su gran calibre y por no ser colapsable <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup>.</p>
+    <p>Recomendaciones transversales: inserción no tunelizada, sin manguito, ecoguiada, con confirmación radiográfica de la posición de la punta (unión cavo-atrial para accesos superiores; vena cava inferior para femorales) antes de iniciar la terapia <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+    <figure style="margin:1rem 0">
+      <img src="${IMG}Cateter..png" alt="Fotografía de la inserción de un catéter de doble lumen en acceso femoral bajo campo estéril, con dos jeringas conectadas a los lúmenes rojo y azul para comprobar su permeabilidad." loading="lazy">
+      <figcaption style="font-size:.78rem;color:var(--ink-500);margin-top:.4rem">Fig. 4 — Inserción de catéter de doble luz en acceso femoral, con jeringas de comprobación de permeabilidad de ambos lúmenes.</figcaption>
+    </figure>
+    <h3>Calibre recomendado según el peso</h3>
+    <table class="data">
+      <tr><th>Peso del paciente</th><th>Calibre recomendado</th></tr>
+      <tr><td>Neonato (&lt;3 kg)</td><td>5–7 Fr (5 Fr luz única; 6.5–7 Fr doble luz)</td></tr>
+      <tr><td>3–6 kg</td><td>7 Fr</td></tr>
+      <tr><td>6–12 kg</td><td>8 Fr</td></tr>
+      <tr><td>12–20 kg</td><td>8–9 Fr</td></tr>
+      <tr><td>20–30 kg</td><td>8–10 Fr</td></tr>
+      <tr><td>&gt;30 kg</td><td>10–12 Fr</td></tr>
+    </table>
+    <p>El calibre mínimo preferido es 6.5 ${gl("Fr (French)","Fr")}, ya que el 5 Fr acorta la vida útil del catéter <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+    <h3>Volumen de cebado vs. volemia (regla del 10%)</h3>
+    <p>Principio operativo unánime: el volumen del circuito extracorpóreo (${gl("VEC")}) no debe superar el 10% de la volemia del paciente (equivalente a ≤8 mL/kg) <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+    <table class="data">
+      <tr><th>Grupo etario</th><th>Volemia de referencia</th></tr>
+      <tr><td>Neonato a término</td><td>80–90 mL/kg</td></tr>
+      <tr><td>Neonato prematuro</td><td>90–100 mL/kg</td></tr>
+      <tr><td>Lactante</td><td>70–80 mL/kg</td></tr>
+      <tr><td>Niño</td><td>70–75 mL/kg</td></tr>
+      <tr><td>Adulto</td><td>65–70 mL/kg</td></tr>
+    </table>
+    <div class="callout warn"><strong>Síndrome de liberación de bradiquinina:</strong> el cebado con sangre ácida en contacto con membranas de acrilonitrilo (${gl("AN-69")}, usadas en los sets M60/M100/M150) puede desencadenar un síndrome de liberación de bradiquinina potencialmente grave en el lactante crítico. Estrategias descritas: ultrafiltración a balance cero antes de administrar el cebado, tamponar con bicarbonato/THAM, o emplear filtros de poliarilétersulfona <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</div>
+  `
+},
+{
+  id:"circuito",
+  tab:"Circuito y Prismaflex",
+  title:"Circuito extracorpóreo y máquina Prismaflex",
+  figure:{src:"conexi%C3%B3n%20a%20paciente%20con%20hemodiafiltracion%20venovenosa%20continua.png", alt:"Diagrama completo del circuito de hemodiafiltración venovenosa continua mostrando hemofiltro, bomba de sangre, bomba de jeringa de anticoagulante, detector de aire, clamp de retorno y las cuatro bolsas: dializado, efluente, reposición y anticoagulante.", caption:"Fig. 5 — Circuito de CVVHDF y conexión al paciente (elementos numerados abajo)."},
+  html:`
+    <h3>Componentes del circuito</h3>
+    <p>Los componentes que suman al volumen extracorpóreo son el catéter de doble luz, las líneas arterial y venosa, la cámara atrapaburbujas y el filtro, montados sobre la plataforma de la máquina y sus bolsas. La línea de retorno incorpora además un detector de aire y un clamp como elementos de seguridad de la conexión <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+    <div class="hotspot-wrap" id="hotspot-wrap">
+      <img src="${IMG}conexi%C3%B3n%20a%20paciente%20con%20hemodiafiltracion%20venovenosa%20continua.png" alt="Diagrama del circuito de CVVHDF con hemofiltro, bombas y cuatro bolsas de solución." loading="lazy">
+      <!-- hotspots posicionados por porcentaje -->
+      <button class="hotspot" style="left:16%;top:48%" data-pop="hs1" aria-label="Hemofiltro">1</button>
+      <button class="hotspot" style="left:33%;top:22%" data-pop="hs2" aria-label="Bomba de jeringa (anticoagulante)">2</button>
+      <button class="hotspot" style="left:57%;top:24%" data-pop="hs3" aria-label="Bomba de sangre">3</button>
+      <button class="hotspot" style="left:70%;top:9%" data-pop="hs4" aria-label="Detector de aire y clamp">4</button>
+      <button class="hotspot" style="left:45%;top:36%" data-pop="hs5" aria-label="Puertos pre y posfiltro">5</button>
+      <button class="hotspot" style="left:11%;top:88%" data-pop="hs6" aria-label="Bolsa de dializado">6</button>
+      <button class="hotspot" style="left:30%;top:88%" data-pop="hs7" aria-label="Bolsa de efluente">7</button>
+      <button class="hotspot" style="left:49%;top:88%" data-pop="hs8" aria-label="Bolsa de reposición">8</button>
+      <button class="hotspot" style="left:75%;top:88%" data-pop="hs9" aria-label="Bolsa de anticoagulante">9</button>
+      <div class="hotspot-pop" data-id="hs1"><strong>Hemofiltro.</strong> Membrana de fibra hueca donde ocurre la difusión, convección y adsorción entre sangre y dializado/ultrafiltrado.</div>
+      <div class="hotspot-pop" data-id="hs2"><strong>Bomba de jeringa.</strong> Infunde el anticoagulante (p. ej. citrato) justo antes del ingreso de la sangre a la bomba/filtro.</div>
+      <div class="hotspot-pop" data-id="hs3"><strong>Bomba de sangre.</strong> Controla el flujo sanguíneo (Qb) desde el acceso vascular hacia el filtro.</div>
+      <div class="hotspot-pop" data-id="hs4"><strong>Detector de aire y clamp.</strong> Elementos de seguridad en la línea de retorno, inmediatamente antes de que la sangre reingrese al paciente.</div>
+      <div class="hotspot-pop" data-id="hs5"><strong>Puertos de reposición pre/posfiltro.</strong> Puntos de infusión del líquido de reposición antes (predilución) o después (postdilución) del filtro.</div>
+      <div class="hotspot-pop" data-id="hs6"><strong>Bolsa de dializado.</strong> Solución que circula a contracorriente por fuera de las fibras, generando aclaramiento difusivo.</div>
+      <div class="hotspot-pop" data-id="hs7"><strong>Bolsa de efluente.</strong> Recolecta el líquido removido (ultrafiltrado + dializado usado); define la dosis entregada.</div>
+      <div class="hotspot-pop" data-id="hs8"><strong>Bolsa de reposición.</strong> Aporta el líquido de sustitución para el aclaramiento convectivo (predilución o postdilución).</div>
+      <div class="hotspot-pop" data-id="hs9"><strong>Bolsa de anticoagulante.</strong> Contiene la solución de citrato (o heparina) infundida por la bomba de jeringa.</div>
+    </div>
+    <p class="transcript-note">Toque o presione Enter sobre cada número para ver la función del componente (puntos calientes).</p>
+
+    <h3>La máquina Prismaflex</h3>
+    <figure style="max-width:220px;margin:1rem 0">
+      <img src="${IMG}M%C3%A1quina%20prismaflex.png" alt="Fotografía de la máquina Prismaflex con las cuatro bolsas montadas sobre las básculas gravimétricas." loading="lazy">
+      <figcaption style="font-size:.78rem;color:var(--ink-500);margin-top:.4rem">Fig. 6 — Máquina Prismaflex con bolsas sobre básculas del sistema de control de fluidos gravimétrico.</figcaption>
+    </figure>
+    <p>Las bolsas de dializado, efluente y reposición se montan sobre básculas que forman parte del sistema de control de fluidos gravimétrico de la plataforma <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>. En el diseño Prismaflex, la entrada de sangre al filtro está en su extremo inferior, lo que facilita el purgado y la eliminación de burbujas de aire del compartimento sanguíneo, a diferencia de configuraciones previas <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="4">[4]</a></sup>. Una quinta bomba del sistema permite la infusión de líquido de reposición prefiltro (PBP), haciendo posible el uso de citrato para la anticoagulación del circuito <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="4">[4]</a></sup>. Los sistemas modernos simplifican el cebado mediante ayuda paso a paso en pantalla y sets de tubería preensamblados de autocarga <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="4">[4]</a></sup>.</p>
+
+    <h3>Selección del set de hemofiltro según el peso</h3>
+    <p>La elección busca tres condiciones a la vez: que el volumen del circuito se mantenga dentro del 10% de la volemia, que la superficie del filtro se aproxime a 0.8–1 × la superficie corporal, y que el flujo de sangre mínimo del set pueda cubrirse con el catéter disponible <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+    <table class="data">
+      <tr><th>Set Prismaflex</th><th>Superficie del filtro</th><th>Cebado del set</th><th>Flujo de sangre mínimo</th><th>Peso sugerido</th></tr>
+      <tr><td>HF20</td><td>0.2 m²</td><td>58 mL</td><td>20 mL/min</td><td>≥8 kg (SC &lt;0.5 m²)</td></tr>
+      <tr><td>M60 (AN-69)</td><td>0.6 m²</td><td>93 mL</td><td>50 mL/min</td><td>≥11 kg</td></tr>
+      <tr><td>M100</td><td>0.9–1.0 m²</td><td>152 mL</td><td>75 mL/min</td><td>≥30 kg</td></tr>
+      <tr><td>M150</td><td>1.5 m²</td><td>189 mL</td><td>100 mL/min</td><td>≥30 kg</td></tr>
+    </table>
+    <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>
+  `
+},
+{
+  id:"cinetica",
+  tab:"Cinética y alarmas",
+  title:"Cinética de membrana y solución de problemas",
+  figure:{src:"Funcionamiento%20del%20filtro.png", alt:"Diagrama del hemofiltro de fibra hueca mostrando el sentido del flujo de sangre y dializado.", caption:"El gradiente de presión a través de la membrana determina la ultrafiltración y, en exceso, la coagulación del filtro."},
+  html:`
+    <h3>Fracción de filtración (FF)</h3>
+    <p>La ${gl("FF")} es el porcentaje del agua plasmática que se filtra al pasar por la membrana respecto del volumen acuoso que entra al filtro. Su control por debajo del 20–25% es una de las principales medidas para preservar la vida del filtro <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>.</p>
+    <div class="formula">FF = Q_UF / Q_P = Q_UF / [Q_B(1 − Hto) + Q_R,PRE]</div>
+    <p>Donde Q_UF = tasa de ultrafiltración, Q_P = flujo plasmático, Q_B = flujo de sangre, Hto = hematocrito (fracción), Q_R,PRE = flujo de reposición prefiltro <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>. Al extraer un porcentaje excesivo del agua plasmática, la sangre se hemoconcentra dentro de la fibra hueca (aumento de Hto y viscosidad locales), lo que se vincula directamente con mayor riesgo de coagulación del filtro. Para reducir la FF conviene aumentar Q_B, aumentar el flujo de dializado, aumentar la fracción prefiltro de la reposición y disminuir el flujo total de reposición <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+
+    <h3>Puntos de medición de presión</h3>
+    <ul>
+      <li><strong>Presión de acceso</strong> (negativa) y <strong>presión de retorno</strong> (positiva): dependen del rendimiento del acceso vascular respecto al flujo programado y de la posición del paciente.</li>
+      <li><strong>Caída de presión (DP) / gradiente del filtro:</strong> gradiente entre entrada del filtro y retorno; su aumento rápido es indicador fiable de coagulación del filtro.</li>
+      <li><strong>Presión transmembrana (${gl("PTM")}):</strong> calculada por software; un aumento rápido señala fallo de la fibra hueca. Un valor &gt;250 mmHg se considera comúnmente indicativo de coagulación membranosa sustancial.</li>
+    </ul>
+    <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>
+
+    <h3>Resolución analítica de alarmas</h3>
+    <div class="accordion-item">
+      <button class="accordion-trigger" aria-expanded="false">(A) Baja presión de acceso ("arterial baja") <span class="chev">▾</span></button>
+      <div class="accordion-panel">
+        <table class="data">
+          <tr><th>Causa posible</th><th>Acción</th></tr>
+          <tr><td>Línea acodada o clampada</td><td>Retirar el acodamiento</td></tr>
+          <tr><td>Línea coagulada</td><td>Descoagular el acceso</td></tr>
+          <tr><td>Catéter contra la pared del vaso</td><td>Considerar intercambiar los lúmenes (crea recirculación)</td></tr>
+          <tr><td>Hipovolemia</td><td>Detener la ultrafiltración y disminuir el flujo de sangre</td></tr>
+        </table>
+        <p>Una presión de acceso &lt;−100/−150 mmHg traduce relleno inadecuado del segmento de bomba por acceso deficiente; si es sutil, el operador puede no advertirlo hasta que suena la alarma, con riesgo de coagulación prematura <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-trigger" aria-expanded="false">(B) Alta presión de retorno ("venosa alta") <span class="chev">▾</span></button>
+      <div class="accordion-panel">
+        <table class="data">
+          <tr><th>Causa posible</th><th>Acción</th></tr>
+          <tr><td>Línea acodada o clampada</td><td>Retirar el acodamiento</td></tr>
+          <tr><td>Línea coagulada</td><td>Descoagular el acceso</td></tr>
+          <tr><td>Obstrucción posicional del acceso</td><td>Considerar intercambiar los lúmenes</td></tr>
+        </table>
+        <p>La cámara venosa/atrapaburbujas es un sitio frecuente de coagulación por la interfase sangre-aire y el estancamiento; mantener la cámara llena con espacio de aire mínimo y evitar el batido/espuma reduce este riesgo <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+      </div>
+    </div>
+    <div class="accordion-item">
+      <button class="accordion-trigger" aria-expanded="false">(C) Elevación de la PTM / gradiente del filtro <span class="chev">▾</span></button>
+      <div class="accordion-panel">
+        <table class="data">
+          <tr><th>Causa posible</th><th>Acción</th></tr>
+          <tr><td>Filtro colmatándose</td><td>Evaluar recambio de circuito</td></tr>
+          <tr><td>Línea de diálisis acodada o clampada</td><td>Desclampar la línea</td></tr>
+          <tr><td>Flujo de sangre lento para el ajuste de UF</td><td>Aumentar la velocidad de flujo de sangre; revisar el ajuste de UF</td></tr>
+        </table>
+        <p>Signo diagnóstico orientador: PTM baja (90–100 mmHg) al inicio que asciende progresivamente en 4–5 h → sospechar coagulación rápidamente progresiva del filtro y revisar la anticoagulación <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+      </div>
+    </div>
+    <div class="callout info">Marco de severidad de alarmas: aviso (intervención futura) → advertencia (intervención inmediata) → crisis (parada de la máquina); clasificación enclavada (requiere corrección + silenciado) vs. no enclavada (autocorrige y reinicia) <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</div>
+
+    <h3>Medidas generales para prolongar la vida del filtro</h3>
+    <p>Optimizar el acceso vascular (tamaño adecuado, evitar acodaduras) y responder con prontitud a las alarmas; optimizar el tamaño del filtro; ajustar la prescripción minimizando la convección y prefiriendo la difusión cuando la condición lo permita, usar predilución, mantener FF &lt;20–25% y minimizar el contacto sangre-aire en la cámara de desaireación; realizar lavados con solución salina equivalentes al volumen del circuito cada 30–60 minutos cuando no hay anticoagulación, contabilizándolos en el cálculo de ultrafiltración <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>.</p>
+  `
+},
+{
+  id:"anticoagulacion",
+  tab:"Anticoagulación",
+  title:"Anticoagulación: citrato regional vs. heparina",
+  figure:{src:"Diagrama%20de%20citrato.png", alt:"Diagrama del protocolo de anticoagulación regional con citrato diluido (Regiocit) en ocho pasos numerados, desde la dosis inicial de citrato hasta la reposición de calcio al paciente.", caption:"Protocolo de anticoagulación regional con citrato diluido (Regiocit 18 mmol/L) en ocho pasos."},
+  html:`
+    <h3>Fisiología: quelación del calcio y metabolismo a bicarbonato</h3>
+    <p>El citrato quela el calcio iónico formando complejos citrato-calcio no ionizados, reduciendo el iCa del circuito e inhibiendo la cascada de coagulación (el calcio es cofactor imprescindible para la propagación de la cascada y la formación de trombina) <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="6">[6]</a></sup>. El peso molecular del citrato es de 191 Da: al ser una molécula pequeña, difunde con facilidad a través de la membrana, por lo que la mayor parte del complejo citrato-calcio se pierde en el efluente <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="6">[6]</a></sup>. El citrato/complejos que llegan al paciente se diluyen en su sangre y son metabolizados por hígado, riñón y músculo esquelético a bicarbonato libre:</p>
+    <div class="formula">1 ion citrato → 3 iones bicarbonato</div>
+    <p>El iCa perdido en el efluente se repone con una infusión de calcio <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+
+    <h3>Protocolo de citrato diluido (Regiocit 18 mmol/L)</h3>
+    <img src="${IMG}Diagrama%20de%20citrato.png" alt="Diagrama del protocolo de anticoagulación regional con citrato en ocho pasos: dosis de citrato, flujo de sangre, fracción de filtración, calcio posfiltro, reposición postdilución, suplementación de calcio y calcio del paciente." style="max-width:520px;margin:.8rem 0" loading="lazy">
+    <table class="data">
+      <tr><th>Paso</th><th>Elemento</th><th>Parámetro / meta</th></tr>
+      <tr><td>1</td><td>Dosis inicial de citrato (Regiocit)</td><td>3 mmol/L y titulación</td></tr>
+      <tr><td>2</td><td>Flujo de sangre (Qb)</td><td>3–4 mL/kg/min</td></tr>
+      <tr><td>3–4</td><td>Bolsa de efluente / Fracción de filtración</td><td>FF objetivo &lt;25%</td></tr>
+      <tr><td>5</td><td>Ca²⁺ posfiltro (puerto azul del Prismaflex)</td><td>iCa posfiltro &lt;0.5 mmol/L</td></tr>
+      <tr><td>6</td><td>Sustitución en postdilución (Biphozyl)</td><td>Dosis de efluente &lt;35–40 mL/kg/h</td></tr>
+      <tr><td>7</td><td>Suplementación de calcio (CaCl₂ 10%)</td><td>Según iCa del paciente</td></tr>
+      <tr><td>8</td><td>iCa del paciente (línea arterial)</td><td>iCa sistémico ≥0.9 mmol/L</td></tr>
+    </table>
+    <p>Metas de titulación: iCa posfiltro 0.25–0.35 mmol/L (0.25–0.45 mmol/L para evitar coagulación del filtro); iCa sistémico ≥0.9 mmol/L — si cae por debajo, se administran 10 mL de CaCl₂ al 10% por vía central; relación ${gl("tCa/iCa")} ≤2.5, controlada a las 6 h del inicio y luego diariamente <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="6">[6]</a></sup>.</p>
+    <p>Cálculo de la dosis de efluente pediátrica: dosis (L/h/1.73 m²) = (CFR + RFR + NBR) × 1.73/SC × 1/1000, donde CFR = flujo de citrato, RFR = flujo de reposición posfiltro, NBR = balance negativo neto <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="6">[6]</a></sup>.</p>
+
+    <h3>Toxicidad por citrato</h3>
+    <p>La relación calcio total/calcio iónico (tCa/iCa) &gt;2.5 es un marcador subrogado de acumulación de citrato en el paciente crítico; debe usarse calcio total, no "calcio corregido" <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="6">[6]</a></sup>. La acumulación (bloqueo por citrato) ocurre cuando su administración excede la capacidad de metabolizarlo (falla hepática, choque circulatorio); en pediatría es más frecuente en neonatos e infantes por inmadurez hepática, y porque en el niño solo se elimina 10–30% del citrato por la propia TRRC, frente a 40–60% en el adulto <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="6">[6]</a></sup>.</p>
+    <div class="callout warn">
+      <strong>Complicaciones metabólicas del citrato:</strong> alcalosis metabólica (la más frecuente; cada mol de citrato genera 3 moles de bicarbonato), acidosis metabólica (por aporte insuficiente de tampón o metabolismo alterado en sepsis/choque/falla orgánica), hipocalcemia (hipotensión, arritmias, tetania), hipernatremia (más frecuente con soluciones concentradas), hipomagnesemia e hipofosfatemia <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="6">[6]</a></sup>. Contraindicaciones/precauciones: enfermedad hepática, choque hepático, acidosis láctica e hipoperfusión severa <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>.
+    </div>
+
+    <h3>Heparina no fraccionada y de bajo peso molecular</h3>
+    <p>La eficacia de la heparina depende de la antitrombina III (${gl("ATIII")}), que conviene mantener por encima del 100%; su déficit reduce la respuesta anticoagulante, algo relevante en el neonato por sus menores niveles fisiológicos <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>. Mecanísticamente, la heparina anticoagula bloqueando el factor Xa y la trombina <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+    <table class="data">
+      <tr><th>Parámetro</th><th>Valor</th></tr>
+      <tr><td>HNF — bolo inicial</td><td>20–50 U/kg</td></tr>
+      <tr><td>HNF — infusión</td><td>5–20 U/kg/h</td></tr>
+      <tr><td>Monitoreo de HNF</td><td>aPTT 45–60 s (1.5–2× el normal) o ACT 180–240 s</td></tr>
+      <tr><td>HBPM (enoxaparina)</td><td>carga 0.15 mg/kg + infusión 0.05 mg/kg/h; anti-Xa 0.25–0.35 UI/mL</td></tr>
+      <tr><td>Ajuste según coagulación</td><td>reducir o suspender si INR &gt;2.5, aPTT &gt;60 s o plaquetas &lt;75×10⁹/L</td></tr>
+    </table>
+    <p>Principio de seguridad: siempre debe priorizarse la seguridad del paciente por encima de la conservación del circuito; la monitorización del aPTT busca asegurar que no exista anticoagulación sistémica innecesaria o excesiva, no titular la heparina <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+
+    <h3>RCA vs. heparina — evidencia comparativa</h3>
+    <p>La ${gl("RCA")} se asocia a menor tasa de coagulación y mayor vida media del circuito frente a heparina, con reducción de necesidades transfusionales, a costa de alcalosis metabólica y alteraciones del metabolismo del calcio <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>. En una revisión sistemática de estudios pediátricos, la RCA mostró menos eventos de coagulación y mayor vida útil del circuito que la heparina, aunque con complicaciones como alcalosis metabólica, hipocalcemia e hipernatremia <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="6">[6]</a></sup>. Las guías KDIGO 2012 recomiendan RCA como anticoagulante de primera línea en pacientes sin contraindicación para citrato <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup>. En entornos de recursos limitados, la HNF sigue siendo el anticoagulante más usado, por la curva de aprendizaje y el monitoreo intensivo que exige la RCA <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>. Alternativas menos frecuentes cuando heparina y citrato están contraindicados: prostaciclina (infusión continua, sin necesidad de monitoreo de coagulación pero con riesgo de hipotensión) y nafamostat <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup>.</p>
+  `
+},
+{
+  id:"programacion",
+  tab:"Programación y balance",
+  title:"Programación de la máquina y homeostasis líquida",
+  figure:{src:"Diagramas%20esquem%C3%A1ticos%20de%20terapia%20de%20reemplazo%20renal%20continua.png", alt:"Diagramas esquemáticos de las modalidades SCUF, CVVH, CVVHD y CVVHDF, cada una activando un conjunto distinto de bombas.", caption:"Cada modalidad activa un conjunto distinto de bombas, lo que determina qué flujos se prescriben."},
+  html:`
+    <h3>Paso 1 — Flujo de sangre (Qb)</h3>
+    <p>Se inicia habitualmente en 3–5 mL/kg/min y se aumenta a 8–10 mL/kg/min si se tolera, con un máximo práctico de 150 mL/min (hasta 300 mL/min en niños grandes) <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>. La presión de entrada objetivo se mantiene &gt;−150 mmHg; por encima aparecen flujos protrombóticos y alarmas <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>. Un Qb mayor mejora el aclaramiento y reduce la coagulación del filtro, aunque aumenta las presiones en cartuchos pequeños y la exposición al citrato <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+
+    <h3>Paso 2 — Dosis de efluente (${gl("Qeff")})</h3>
+    <div class="formula">Q_eff = Q_UF + Q_D  (suma del flujo de dializado y del flujo de reposición)</div>
+    <p>El objetivo entregado es 20–25 mL/kg/h (recomendación KDIGO); como la dosis entregada suele ser menor que la prescrita, conviene prescribir 25–35 mL/kg/h y mantener una razón entregada/prescrita ≥0.8 <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>. Como referencia práctica, la dosis se mantiene &lt;35–40 mL/kg/h salvo indicaciones especiales; expresada por superficie corporal, un mínimo de 2000 mL/1.73 m²/h equivale a un Kt/V≈1.0. En hiperamonemia, falla hepática, lisis tumoral e intoxicaciones se emplean dosis altas de hasta 8000 mL/1.73 m²/h <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>.</p>
+    <p>Distribución según modalidad: en CVVHDF, el dializado (Qd) representa 50% de la dosis prescrita y la reposición (Qp) el otro 50%; en CVVHD, Qd=100%; en CVVH, Qp=100%. La fracción posfiltro de la reposición no puede ser cero, pues evita mezcla de aire con sangre en la cámara de desaireación y coagulación en la línea de retorno <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>.</p>
+
+    <h3>Paso 3 — Ultrafiltración neta y homeostasis líquida</h3>
+    <p>La homeostasis líquida es el mantenimiento del equilibrio entre ingresos y egresos de agua del paciente, evitando por igual la sobrecarga hídrica y la hipovolemia con hipoperfusión. La ventaja de la terapia continua es que permite retirar el exceso de agua de manera lenta y sostenida, sin las oscilaciones bruscas de volumen propias de las técnicas intermitentes <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup>.</p>
+    <div class="formula">UFR = (Ingresos totales − Egresos + Balance objetivo negativo) / 24 horas</div>
+    <p>Límites de seguridad de la remoción: 0.5–2 mL/kg/h o 1–3% del volumen sanguíneo por hora <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>. Cuando el objetivo es balance negativo, la meta ideal es perder al menos el 5% del peso por día; es posible operar con UF cero o incluso balances positivos según la hemodinamia <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>. En el niño hemodinámicamente inestable, la remoción se inicia en 0 mL/h y se incrementa gradualmente buscando balance neutro conforme mejora la acidosis y la estabilidad hemodinámica <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>.</p>
+
+    <h3>Ejemplo de prescripción paso a paso</h3>
+    <div class="callout tip">
+      <strong>Caso de referencia (Manual TRRC):</strong> niño de 6 años y 20 kg con choque séptico, LRA KDIGO 3 y sobrecarga hídrica del 12% refractaria a diuréticos. Con volemia ≈75 mL/kg×20 kg≈1500 mL (10%=150 mL), se elige el set M60 (cebado 93 mL); Qb inicial 3 mL/kg/min (~60 mL/min) hasta 5 mL/kg/min (~100 mL/min); dosis de efluente 30 mL/kg/h (600 mL/h) en postdilución con Biphozyl; citrato Regiocit a 3 mmol/L titulado por iCa posfiltro; con Qb 100 mL/min y Hto 30%, el flujo plasmático es ≈4200 mL/h y con efluente ≈700 mL/h, la FF≈15%, dentro de meta. La ultrafiltración neta se calcula sumando ingresos ajenos a la TRRC y restando diuresis, limitada al umbral de seguridad de 2 mL/kg/h.
+    </div>
+
+    <h3>Calentador de sangre</h3>
+    <p>Si la máquina no lo integra, debe acoplarse un calentador externo, pues la hipotermia es una complicación relevante, especialmente en neonatos y lactantes <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>.</p>
+  `
+},
+{
+  id:"destete",
+  tab:"Destete",
+  title:"Fisiología del destete",
+  figure:{src:"M%C3%A1quina%20prismaflex.png", alt:"Fotografía de la máquina Prismaflex, cuyo circuito se suspende gradualmente al cumplirse los criterios de destete.", caption:"El destete se plantea cuando se cumplen las metas iniciales de la terapia."},
+  html:`
+    <p>El destete se plantea cuando se han cumplido las metas iniciales de la terapia; el proceso se denomina "reto renal" y puede complementarse con diuréticos para valorar la producción de orina y con la evaluación paraclínica de la depuración de azoados <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>.</p>
+    <h3>Criterios de estabilidad y recuperación renal</h3>
+    <ul>
+      <li>Estabilidad hemodinámica.</li>
+      <li>Balance hídrico que permita acumular ligeramente fluido sin aumentar el riesgo de edema pulmonar.</li>
+      <li>Electrolitos y estado ácido-base normales.</li>
+      <li>Volumen urinario adecuado según la edad.</li>
+      <li>Transición a hemodiálisis intermitente o diálisis peritoneal si el paciente está estable pero aún requiere soporte de equilibrio hídrico o de solutos.</li>
+    </ul>
+    <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup>
+    <p>Se debe discontinuar la TRRC cuando la función renal intrínseca se ha recuperado lo suficiente para cubrir las necesidades del paciente, o cuando la TRRC ya no es consistente con los objetivos de cuidado (KDIGO) <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup>. Los indicadores clínicos de discontinuación incluyen aumento de la diuresis, resolución de la sobrecarga hídrica y ausencia de necesidad de medicamentos vasoactivos <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup>. Debe considerarse una "pausa del filtro" (filter holiday) si la diuresis espontánea es &gt;0.5 mL/kg/h con estado ácido-base y electrolitos controlados <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>.</p>
+    <div class="callout info">La discontinuación carece de evidencia robusta; el mejor correlato de éxito descrito es una diuresis espontánea &gt;0.5 mL/kg/h sostenida durante 6–24 h <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>. Las guías KDIGO desaconsejan el uso de diuréticos para promover la recuperación de la función renal o para acortar la duración de la TRRC <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="5">[5]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="1">[1]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>. Con frecuencia se requiere hemodiálisis intermitente o SLED (diálisis sostenida de baja eficiencia) como puente antes de la discontinuación total <sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="3">[3]</a></sup><sup class="cite"><a href="#bibliografia" class="cite-link" data-refnum="2">[2]</a></sup>.</div>
+  `
+}
+];
+
+function renderContentModule(){
+  const tablist = document.getElementById("section-tablist");
+  const container = document.getElementById("content-sections");
+  tablist.innerHTML = "";
+  container.innerHTML = "";
+  CONTENT_SECTIONS.forEach(function(sec, i){
+    const tabBtn = document.createElement("button");
+    tabBtn.className = "section-tab";
+    tabBtn.setAttribute("role","tab");
+    tabBtn.setAttribute("aria-selected", i===0 ? "true":"false");
+    tabBtn.id = "sec-tab-"+sec.id;
+    tabBtn.innerHTML = sec.tab + '<span class="dot"></span>';
+    tabBtn.addEventListener("click", function(){ activateSection(sec.id); });
+    tablist.appendChild(tabBtn);
+
+    const panel = document.createElement("div");
+    panel.className = "content-section" + (i===0 ? " active":"");
+    panel.id = "sec-panel-"+sec.id;
+    panel.setAttribute("role","tabpanel");
+    panel.innerHTML = `
+      <h2>${sec.title}</h2>
+      <div class="content-grid">
+        <div class="section-text">${sec.html}</div>
+        <figure class="fig-card${sec.id==='circuito'?' static':''}">
+          <img src="${IMG}${sec.figure.src}" alt="${sec.figure.alt}" loading="lazy">
+          <figcaption>${sec.figure.caption}</figcaption>
+        </figure>
+      </div>
+      <button class="mark-read-btn" data-sec="${sec.id}">Marcar sección como leída</button>
+    `;
+    container.appendChild(panel);
+  });
+
+  // accordions
+  container.querySelectorAll(".accordion-trigger").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      const open = btn.getAttribute("aria-expanded")==="true";
+      btn.setAttribute("aria-expanded", open? "false":"true");
+      const panel = btn.nextElementSibling;
+      panel.classList.toggle("open", !open);
+    });
+  });
+
+  // mark read buttons
+  container.querySelectorAll(".mark-read-btn").forEach(function(btn){
+    const id = btn.getAttribute("data-sec");
+    if(STATE.m1_sections_read[id]){ btn.textContent="✓ Sección leída"; btn.setAttribute("data-done","1"); }
+    btn.addEventListener("click", function(){
+      STATE.m1_sections_read[id] = true;
+      btn.textContent = "✓ Sección leída";
+      btn.setAttribute("data-done","1");
+      document.getElementById("sec-tab-"+id).classList.add("done");
+      saveState();
+    });
+  });
+
+  // reflect done dots initially
+  CONTENT_SECTIONS.forEach(function(sec){
+    if(STATE.m1_sections_read[sec.id]) document.getElementById("sec-tab-"+sec.id).classList.add("done");
+  });
+
+  // hotspots (only exist in "circuito" section)
+  const hsWrap = document.getElementById("hotspot-wrap");
+  if(hsWrap){
+    hsWrap.querySelectorAll(".hotspot").forEach(function(hs){
+      function toggle(e){
+        e.stopPropagation();
+        const id = hs.getAttribute("data-pop");
+        const pop = hsWrap.querySelector('.hotspot-pop[data-id="'+id+'"]');
+        const already = pop.classList.contains("show");
+        hsWrap.querySelectorAll(".hotspot-pop").forEach(p=>p.classList.remove("show"));
+        if(!already){
+          pop.style.left = hs.style.left;
+          pop.style.top = "calc(" + hs.style.top + " + 28px)";
+          pop.classList.add("show");
+        }
+      }
+      hs.addEventListener("click", toggle);
+      hs.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){e.preventDefault(); toggle(e);} });
+    });
+    document.addEventListener("click", function(){ hsWrap.querySelectorAll(".hotspot-pop").forEach(p=>p.classList.remove("show")); });
+  }
+
+  initGlossary();
+}
+
+function activateSection(id){
+  document.querySelectorAll(".section-tab").forEach(function(t){
+    t.setAttribute("aria-selected", t.id==="sec-tab-"+id ? "true":"false");
+  });
+  document.querySelectorAll(".content-section").forEach(function(p){
+    p.classList.toggle("active", p.id==="sec-panel-"+id);
+  });
+}
+
+/* ============================================================
+   5. MÓDULO 2 — PODCAST
+   ============================================================ */
+function initPodcast(){
+  const audio = document.getElementById("podcast-audio");
+  const status = document.getElementById("podcast-status");
+  if(STATE.m2_played){ status.textContent = "✓ Ya registró la escucha de este episodio."; }
+  audio.addEventListener("play", function(){
+    if(!STATE.m2_played){
+      STATE.m2_played = true;
+      status.textContent = "✓ Progreso registrado: reproducción iniciada.";
+      saveState();
+    }
+  });
+}
+
+/* ============================================================
+   6. MÓDULO 3 — FLASHCARDS (12, 2 por nivel de Bloom)
+   ============================================================ */
+const BLOOM_COLORS = {
+  "Recordar":"#0f766e","Comprender":"#0369a1","Aplicar":"#7c3aed",
+  "Analizar":"#c2410c","Evaluar":"#b91c1c","Crear":"#a21caf"
+};
+const FLASHCARDS = [
+{id:1, level:"Recordar", q:"¿Cuál es el peso molecular aproximado del citrato utilizado en anticoagulación regional?",
+ a:"<strong>191 Da.</strong> Por su bajo peso molecular, el citrato difunde con facilidad a través de la membrana del hemofiltro, por lo que gran parte del complejo citrato-calcio se pierde en el efluente."},
+{id:2, level:"Recordar", q:"¿Cuál es el límite de fracción de filtración (FF) recomendado para minimizar el riesgo de coagulación del filtro en TRRC?",
+ a:"<strong>Menor del 20-25%.</strong> Superar este umbral hemoconcentra la sangre dentro de la fibra hueca y aumenta el riesgo de coagulación del circuito."},
+{id:3, level:"Comprender", q:"Explique por qué, según la ley de Poiseuille, un catéter de mayor diámetro interno mejora notablemente el flujo sanguíneo disponible para la TRRC.",
+ a:"Porque el flujo es proporcional a la <strong>cuarta potencia del radio interno</strong> (Q ∝ r⁴). Un pequeño aumento del calibre interno produce un incremento desproporcionadamente grande del flujo, mientras que alargar el catéter aumenta la resistencia de forma proporcional a la longitud."},
+{id:4, level:"Comprender", q:"¿Por qué la administración de citrato puede producir alcalosis metabólica cuando se infunde en dosis altas?",
+ a:"Porque cada mol de citrato metabolizado en hígado, riñón y músculo esquelético genera <strong>3 moles de bicarbonato</strong>. A dosis altas, esta producción excede las necesidades del paciente y eleva el bicarbonato sérico."},
+{id:5, level:"Aplicar", q:"Un lactante de 8 kg tiene una volemia estimada de 75 mL/kg. ¿Cuál es el volumen máximo aceptable del circuito extracorpóreo, según la regla del 10%?",
+ a:"Volemia total ≈ <strong>600 mL</strong> (75 × 8). El 10% equivale a <strong>60 mL</strong>. El volumen del circuito (catéter + líneas + filtro) no debería superar esta cifra sin considerar cebado con sangre o albúmina."},
+{id:6, level:"Aplicar", q:"Según la tabla de calibres recomendados, ¿qué calibre de catéter doble lumen debe utilizarse en un paciente de 9 kg?",
+ a:"<strong>8 Fr</strong>, correspondiente al rango de 6-12 kg. El calibre mínimo preferido en general es 6.5 Fr, ya que el 5 Fr acorta la vida útil del catéter."},
+{id:7, level:"Analizar", q:"En CVVHDF, la presión transmembrana (PTM) parte de 90-100 mmHg al inicio y asciende progresivamente durante 4-5 horas, sin cambios en la presión de acceso. ¿Qué proceso debe sospecharse?",
+ a:"<strong>Coagulación progresiva del filtro.</strong> Este patrón temporal es un signo orientador que obliga a revisar la anticoagulación (dosis de citrato o heparina) antes de que se pierda el circuito."},
+{id:8, level:"Analizar", q:"Un paciente en RCA presenta una relación calcio total/calcio iónico (tCa/iCa) de 3.1. ¿Qué proceso debe sospecharse y qué error de cálculo debe evitarse?",
+ a:"Debe sospecharse <strong>acumulación o \"bloqueo\" por citrato</strong>, especialmente relevante en falla hepática o hipoperfusión. Para este cálculo debe usarse el calcio total real, nunca el \"calcio corregido\", porque este último no refleja el complejo citrato-calcio circulante."},
+{id:9, level:"Evaluar", q:"Un lactante en choque séptico con índice vasoactivo-inotrópico (VIS) muy elevado requiere HDFVVC. ¿Qué riesgo específico de la RCA debe priorizarse en la vigilancia de este paciente y por qué?",
+ a:"El riesgo de <strong>acumulación/bloqueo por citrato</strong>, porque la hipoperfusión hepática y muscular grave asociada al choque compromete su metabolismo a bicarbonato. Además, en el niño solo se elimina 10-30% del citrato por la propia TRRC (frente a 40-60% en el adulto), lo que agrava el riesgo de acumulación."},
+{id:10, level:"Evaluar", q:"El filtro de un paciente sigue coagulando pese a que el iCa posfiltro está dentro de la meta (0.25-0.45 mmol/L). ¿Qué otras causas, no relacionadas con la dosis de citrato, deben evaluarse antes de aumentarla?",
+ a:"<strong>Disfunción del acceso vascular</strong> (flujo insuficiente, recirculación, catéter acodado o contra la pared del vaso), <strong>fracción de filtración excesiva</strong>, y <strong>coagulación en la cámara atrapaburbujas</strong> por interfase sangre-aire. Aumentar el citrato sin descartar estas causas expone a mayor riesgo de toxicidad sin resolver el problema real."},
+{id:11, level:"Crear", q:"Diseñe la secuencia de decisiones para prescribir CVVHDF en un lactante de 7 kg con choque séptico y sobrecarga hídrica del 20%: acceso vascular, set de filtro, flujo de sangre inicial y anticoagulación.",
+ a:"Una secuencia razonada: (1) confirmar indicación por sobrecarga &gt;10-15% y falla renal; (2) elegir catéter 8 Fr, femoral o yugular derecha según estabilidad, verificando el límite del 10% de la volemia; (3) seleccionar el set más pequeño que cubra el flujo mínimo, considerando cebado con sangre/albúmina si es necesario; (4) iniciar el flujo de sangre en rampa (20-30 mL/min iniciales, luego 3-5 mL/kg/min con incrementos graduales); (5) programar RCA titulando por iCa posfiltro, con vigilancia estrecha de acumulación dado el choque séptico."},
+{id:12, level:"Crear", q:"Proponga un plan de monitoreo escalonado (parámetros y frecuencia aproximada) para las primeras 24 horas de TRRC con citrato regional en un paciente pediátrico crítico.",
+ a:"Un plan razonable: iCa posfiltro/sistémico a los 30 min y 1 h del inicio, luego cada 30 min tras cada ajuste hasta metas, y cada 6 h si estable; relación tCa/iCa a las 6 h y luego diaria; gases, electrolitos, fósforo y magnesio cada 6-8 h; presiones del circuito de forma continua; y temperatura corporal, dado el riesgo de hipotermia."}
+];
+
+function renderFlashcards(){
+  const legend = document.getElementById("bloom-legend");
+  legend.innerHTML = "";
+  Object.keys(BLOOM_COLORS).forEach(function(lv){
+    const chip = document.createElement("span");
+    chip.className = "bloom-chip";
+    chip.style.background = BLOOM_COLORS[lv];
+    chip.textContent = lv;
+    legend.appendChild(chip);
+  });
+
+  const grid = document.getElementById("cards-grid");
+  grid.innerHTML = "";
+  FLASHCARDS.forEach(function(card){
+    const wrap = document.createElement("div");
+    wrap.className = "flashcard" + (STATE.m3_cards_flipped[card.id] ? " flipped":"");
+    wrap.innerHTML = `
+      <button class="flip-btn" aria-label="Tarjeta ${card.id}, nivel ${card.level}. Toque para voltear.">
+        <div class="flashcard-inner">
+          <div class="flashcard-face flashcard-front">
+            <span class="card-level" style="background:${BLOOM_COLORS[card.level]}">${card.level}</span>
+            <div class="card-q">${card.q}</div>
+            <div class="flip-hint">Toque para ver la respuesta ↻</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <span class="card-level" style="background:${BLOOM_COLORS[card.level]}">${card.level}</span>
+            <div class="card-a">${card.a}</div>
+            <div class="flip-hint">Toque para volver ↺</div>
+          </div>
+        </div>
+      </button>
+    `;
+    const btn = wrap.querySelector(".flip-btn");
+    btn.addEventListener("click", function(){
+      wrap.classList.toggle("flipped");
+      STATE.m3_cards_flipped[card.id] = true;
+      saveState();
+    });
+    grid.appendChild(wrap);
+  });
+}
+
+/* ============================================================
+   7. MÓDULO 4 — EVALUACIÓN SUMATIVA (10 preguntas, 1 por imagen)
+   ============================================================ */
+const QUIZ = [
+{id:1, img:"Cateter.png", alt:"Fotografía de un catéter de doble lumen con clamps rojo y azul.",
+ q:"La fotografía muestra un catéter para TRRC pediátrica. ¿Qué característica de su diseño permite identificar la luz de salida hacia el circuito (extracción) sin leer ninguna etiqueta?",
+ options:["El clamp de color rojo, que por convención marca la luz \"arterial\" de extracción.","El clamp de color azul, que marca la luz de extracción por convención.","El diámetro mayor de una de las dos luces internas del catéter.","La posición proximal de la luz respecto a la piel del paciente."],
+ correct:0},
+{id:2, img:"Cateter..png", alt:"Fotografía de la inserción femoral de un catéter con dos jeringas conectadas.",
+ q:"Antes de conectar el catéter recién insertado al circuito extracorpóreo, la imagen muestra una maniobra con jeringas en ambos lúmenes. ¿Cuál es el objetivo principal de esta maniobra?",
+ options:["Comprobar la permeabilidad de ambas luces por aspiración antes de iniciar la terapia.","Purgar el aire de las luces con solución salina heparinizada exclusivamente.","Medir la presión venosa central a través del lumen venoso.","Administrar la dosis de anticoagulante sistémico previa a la inserción."],
+ correct:0},
+{id:3, img:"Diagrama%20de%20citrato.png", alt:"Diagrama del protocolo de citrato en ocho pasos.",
+ q:"En el protocolo de anticoagulación regional con citrato ilustrado, ¿en qué punto del circuito se mide el calcio iónico que determina si debe ajustarse la dosis de citrato?",
+ options:["En la línea arterial, antes de la bomba de sangre, reflejando el estado basal del paciente.","En el puerto posfiltro (antes de la bolsa de reposición), reflejando el efecto del citrato en el circuito.","En la bolsa de efluente, tras la mezcla completa con el dializado.","En la línea de retorno al paciente, tras la reinfusión de calcio."],
+ correct:1},
+{id:4, img:"Principios%20fisicos%20de%20convecci%C3%B3n%20y%20difusi%C3%B3n.png", alt:"Cuatro paneles con los principios de difusión, ultrafiltración, convección y adsorción.",
+ q:"El panel inferior derecho de la figura ilustra un mecanismo de depuración distinto de los otros tres. ¿Cuál es ese mecanismo y qué lo diferencia?",
+ options:["Convección: depende del arrastre de solutos por el movimiento de agua plasmática ultrafiltrada.","Difusión: depende del gradiente de concentración entre sangre y dializado.","Adsorción: depende de la adhesión de moléculas a la superficie del filtro, no de un gradiente de presión o concentración.","Ultrafiltración: depende exclusivamente del gradiente de presión hidrostática."],
+ correct:2},
+{id:5, img:"Flujos%20por%20cateter.png", alt:"Diagrama de la nomenclatura funcional del catéter de doble lumen.",
+ q:"En la nomenclatura funcional del catéter de doble lumen para TRRC, ¿qué describe correctamente el trayecto de la sangre en la luz identificada como \"venosa\" (azul)?",
+ options:["Extrae la sangre del paciente para llevarla hacia la bomba y el filtro.","Conduce la sangre ya tratada desde el circuito extracorpóreo de vuelta hacia el paciente.","Transporta el líquido de reposición hacia el filtro antes de la dilución.","Conduce el dializado desde la máquina hacia el compartimento externo del filtro."],
+ correct:1},
+{id:6, img:"Diagramas%20esquem%C3%A1ticos%20de%20terapia%20de%20reemplazo%20renal%20continua.png", alt:"Cuatro diagramas de las modalidades SCUF, CVVH, CVVHD y CVVHDF.",
+ q:"¿Cuál de las modalidades representadas es la única que no emplea ningún líquido de reposición ni de diálisis, limitándose a extraer agua plasmática?",
+ options:["CVVH (hemofiltración venovenosa continua).","CVVHD (hemodiálisis venovenosa continua).","CVVHDF (hemodiafiltración venovenosa continua).","SCUF (ultrafiltración lenta continua)."],
+ correct:3},
+{id:7, img:"conexi%C3%B3n%20a%20paciente%20con%20hemodiafiltracion%20venovenosa%20continua.png", alt:"Diagrama del circuito completo de CVVHDF con bombas y cuatro bolsas.",
+ q:"En el diagrama del circuito de CVVHDF, ¿qué elemento de seguridad se ubica en la línea de retorno, inmediatamente antes de que la sangre regrese al paciente?",
+ options:["La bomba de jeringa del anticoagulante.","El puerto de reposición prefiltro.","El detector de aire y el clamp de la línea de retorno.","La cámara de la bolsa de dializado."],
+ correct:2},
+{id:8, img:"M%C3%A1quina%20prismaflex.png", alt:"Fotografía de la máquina Prismaflex con sus bolsas montadas.",
+ q:"La fotografía muestra la máquina Prismaflex con sus bolsas montadas. ¿Sobre qué componente de la plataforma se sostienen y controlan estas bolsas durante la terapia?",
+ options:["Sobre sensores ópticos que miden el nivel de llenado de cada bolsa.","Sobre básculas (sistema de control de fluidos gravimétrico) que pesan continuamente cada bolsa.","Sobre válvulas de presión que regulan el flujo de salida de cada bolsa.","Sobre una bomba peristáltica común para las cuatro bolsas."],
+ correct:1},
+{id:9, img:"Tama%C3%B1o%20de%20mol%C3%A9culas%20en%20di%C3%A1lisis.png", alt:"Escala de tamaño molecular en Daltons desde sodio hasta albúmina.",
+ q:"Según la escala de tamaño molecular mostrada, ¿qué molécula debe ser retenida por la membrana y NO debe atravesar el filtro en condiciones normales?",
+ options:["La β2-microglobulina (11.800 Da).","La inulina (5.200 Da).","La albúmina (55.000-60.000 Da).","La vitamina B12 (1.355 Da)."],
+ correct:2},
+{id:10, img:"Funcionamiento%20del%20filtro.png", alt:"Diagrama del hemofiltro de fibra hueca con entrada y salida de sangre y dializado.",
+ q:"En el hemofiltro de fibra hueca representado, ¿qué relación de flujo describe correctamente la circulación de sangre y dializado?",
+ options:["La sangre y el dializado circulan en el mismo sentido dentro de las fibras.","El dializado circula dentro de las fibras y la sangre por fuera de ellas.","La sangre circula dentro de las fibras y el dializado por fuera, en contracorriente.","La sangre entra y sale por el mismo extremo del filtro mientras el dializado circula en contracorriente."],
+ correct:2}
+];
+
+let quizOrder = []; // randomized option order per question, computed once per render
+let quizIndex = 0;
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function renderQuiz(){
+  const container = document.getElementById("quiz-container");
+  if(STATE.m4_completed){
+    renderQuizResults(container);
+    return;
+  }
+  quizIndex = Object.keys(STATE.m4_answers).length;
+  if(quizIndex >= QUIZ.length) quizIndex = QUIZ.length-1;
+  buildQuizQuestion(container);
+}
+
+function buildQuizQuestion(container){
+  const q = QUIZ[quizIndex];
+  const optOrder = shuffle(q.options.map(function(text,i){return {text:text, isCorrect:i===q.correct};}));
+  container.innerHTML = `
+    <div class="quiz-toolbar">
+      <span class="quiz-progress-text">Pregunta ${quizIndex+1} de ${QUIZ.length}</span>
+      <span class="quiz-progress-text">Respondidas: ${Object.keys(STATE.m4_answers).length}/${QUIZ.length}</span>
+    </div>
+    <div class="quiz-card">
+      <div class="quiz-img-wrap">
+        <img src="${IMG}${q.img}" alt="${q.alt}">
+      </div>
+      <h3>${q.q}</h3>
+      <ul class="quiz-options" id="quiz-options"></ul>
+      <div class="quiz-feedback" id="quiz-feedback"></div>
+      <button class="quiz-nav-btn" id="quiz-next-btn" disabled>${quizIndex < QUIZ.length-1 ? "Siguiente" : "Finalizar y ver revisión"}</button>
+    </div>
+  `;
+  const ul = document.getElementById("quiz-options");
+  const prevAnswer = STATE.m4_answers[q.id];
+  optOrder.forEach(function(opt, idx){
+    const li = document.createElement("li");
+    li.innerHTML = `<label><input type="radio" name="quiz-opt" value="${idx}"> <span>${opt.text}</span></label>`;
+    ul.appendChild(li);
+    const input = li.querySelector("input");
+    if(prevAnswer !== undefined){
+      input.disabled = true;
+      if(prevAnswer.chosenText === opt.text) input.checked = true;
+    }
+    input.addEventListener("change", function(){
+      if(STATE.m4_answers[q.id] !== undefined) return;
+      document.querySelectorAll("#quiz-options input").forEach(i=>i.disabled=true);
+      const correct = opt.isCorrect;
+      STATE.m4_answers[q.id] = {chosenText:opt.text, correct:correct, at:new Date().toISOString()};
+      saveState();
+      cloudPost("m4Answer", {userId:CURRENT_USER_ID, questionId:q.id, questionText:q.q, chosenText:opt.text, correct:correct, at:STATE.m4_answers[q.id].at});
+      const fb = document.getElementById("quiz-feedback");
+      fb.classList.add("show");
+      fb.innerHTML = "<strong>Respuesta registrada.</strong> Podrá ver el resultado y la revisión completa al finalizar las 10 preguntas.";
+      document.getElementById("quiz-next-btn").disabled = false;
+    });
+  });
+  if(prevAnswer !== undefined){
+    const fb = document.getElementById("quiz-feedback");
+    fb.classList.add("show");
+    fb.innerHTML = "<strong>Respuesta registrada.</strong> Podrá ver el resultado y la revisión completa al finalizar las 10 preguntas.";
+    document.getElementById("quiz-next-btn").disabled = false;
+  }
+
+  document.getElementById("quiz-next-btn").addEventListener("click", function(){
+    if(quizIndex < QUIZ.length-1){
+      quizIndex++;
+      buildQuizQuestion(container);
+    } else {
+      STATE.m4_completed = true;
+      STATE.m4_completedAt = new Date().toISOString();
+      saveState();
+      const _correctCount = Object.values(STATE.m4_answers).filter(function(a){return a.correct;}).length;
+      cloudPost("m4Completed", {userId:CURRENT_USER_ID, score:_correctCount, total:QUIZ.length, at:STATE.m4_completedAt});
+      renderQuizResults(container);
+    }
+  });
+}
+
+window.__QUIZ_RATIONALE__ = {
+ 1:"Por convención, el clamp rojo marca la luz \"arterial\" que extrae sangre del paciente hacia el circuito.",
+ 2:"La comprobación de permeabilidad por aspiración en ambos lúmenes es un paso de seguridad antes de conectar el catéter al circuito.",
+ 3:"El puerto posfiltro (puerto azul del Prismaflex) es donde se mide el iCa que refleja la eficacia de la anticoagulación regional del circuito.",
+ 4:"La adsorción depende de la adhesión físico-química de moléculas a la membrana, a diferencia de los otros tres mecanismos basados en gradientes.",
+ 5:"La luz \"venosa\" (azul), por convención, retorna la sangre tratada al paciente; la \"arterial\" (roja) la extrae.",
+ 6:"SCUF usa solo ultrafiltración, sin ningún líquido de reposición ni de diálisis, a diferencia de CVVH, CVVHD y CVVHDF.",
+ 7:"El detector de aire y el clamp son los elementos de seguridad de la línea de retorno antes del reingreso de sangre al paciente.",
+ 8:"Las bolsas se controlan mediante básculas que forman el sistema de control de fluidos gravimétrico de la plataforma.",
+ 9:"La albúmina (55.000-60.000 Da) debe ser retenida por la membrana; las demás moléculas listadas son de menor tamaño y sí se depuran.",
+ 10:"En el hemofiltro de fibra hueca, la sangre circula dentro de las fibras y el dializado por fuera, en contracorriente."
+};
+
+function renderQuizResults(container){
+  const total = QUIZ.length;
+  const correctCount = Object.values(STATE.m4_answers).filter(a=>a.correct).length;
+  const pct = Math.round((correctCount/total)*100);
+  const reviewRows = QUIZ.map(function(q){
+    const a = STATE.m4_answers[q.id];
+    const isCorrect = !!(a && a.correct);
+    const correctText = q.options[q.correct];
+    return `
+      <div class="quiz-review-item ${isCorrect ? "correct":"incorrect"}">
+        <p class="quiz-review-q">Pregunta ${q.id}. ${q.q}</p>
+        <p class="quiz-review-a">Su respuesta: <span class="tag">${isCorrect ? "Correcta" : "Incorrecta"}.</span> ${a ? a.chosenText : "(sin responder)"}</p>
+        ${!isCorrect ? `<p class="quiz-review-correct">Respuesta correcta: ${correctText}</p>` : ""}
+        <p class="quiz-review-rationale">${(window.__QUIZ_RATIONALE__ && window.__QUIZ_RATIONALE__[q.id]) || ""}</p>
+      </div>`;
+  }).join("");
+  container.innerHTML = `
+    <div class="quiz-card quiz-results">
+      <div class="score-circle" style="--pct:${pct}"><span>${pct}%</span><small>${correctCount}/${total} correctas</small></div>
+      <h3>Evaluación sumativa completada — Revisión final</h3>
+      <p style="color:var(--ink-700)">Este es el único momento en que puede revisar sus respuestas, con la calificación obtenida en cada pregunta. Su resultado ha quedado registrado en este dispositivo.</p>
+      <div class="quiz-review-list">${reviewRows}</div>
+      <p style="color:var(--ink-700); font-size:.85rem">La evaluación sumativa solo puede presentarse una vez. Este resultado es definitivo y ha quedado registrado.</p>
+    </div>
+  `;
+}
+
+/* ============================================================
+   8. MÓDULO 5 — TALLER PRÁCTICO (caso clínico + pasos + troubleshooting)
+   ============================================================ */
+const CASE_TEXT = "Lactante de 8 meses, 7 kg, ingresa a UCIP por choque séptico de foco urinario. Tras 48 horas de manejo presenta anuria, sobrecarga hídrica del 20% sobre el peso de ingreso y soporte vasopresor alto (índice vasoactivo-inotrópico, VIS, de 60). El equipo decide iniciar hemodiafiltración venovenosa continua (HDFVVC) en la máquina Prismaflex. Usted es el fellow a cargo del montaje, purgado e inicio de la terapia.";
+
+const WORKSHOP_STEPS = [
+{id:1, title:"Indicación y modalidad",
+ q:"¿Cuál es el principal fundamento, según lo revisado, para iniciar TRRC en este paciente?",
+ options:[
+   {t:"Sobrecarga hídrica del 20%, muy por encima del umbral de 10-15% asociado a mayor mortalidad, junto con oligoanuria.", c:true},
+   {t:"La sola presencia de choque séptico, independientemente del estado de volumen.", c:false},
+   {t:"El soporte vasopresor alto, que por sí solo constituye indicación de TRRC.", c:false},
+   {t:"La edad del paciente, ya que todo lactante en UCIP requiere TRRC profiláctica.", c:false}
+ ],
+ feedback:"La sobrecarga hídrica >10-15% refractaria, combinada con oligoanuria, es la indicación principal descrita en las fuentes; cada aumento de 1% en la sobrecarga se asocia a mayor mortalidad.",
+ hint:"Revise el umbral de sobrecarga hídrica asociado a mortalidad en la sección \"Indicaciones y momento\" del Módulo 1."},
+{id:2, title:"Acceso vascular",
+ q:"Calculando la volemia del paciente (≈75 mL/kg) y aplicando la regla del 10%, ¿qué combinación de catéter y sitio es más apropiada?",
+ options:[
+   {t:"Catéter doble lumen 8 Fr, preferiblemente en yugular interna derecha o femoral según estabilidad.", c:true},
+   {t:"Catéter doble lumen 5 Fr en vena subclavia, por su bajo riesgo de infección.", c:false},
+   {t:"Catéter triple lumen 12 Fr en yugular interna izquierda.", c:false},
+   {t:"Catéter monolumen 4 Fr en vena periférica.", c:false}
+ ],
+ feedback:"Para 7 kg (rango 6-12 kg) el calibre recomendado es 8 Fr. El sitio preferido es yugular interna derecha, aunque en inestabilidad hemodinámica el acceso femoral es una alternativa aceptada y de colocación más rápida. La subclavia debe evitarse.",
+ hint:"Consulte la tabla de calibre según peso y la jerarquía de sitios en \"Acceso vascular\"."},
+{id:3, title:"Volumen del circuito y estrategia de cebado",
+ q:"La volemia estimada es ≈525 mL (75 mL/kg × 7 kg); el límite del 10% es ≈52.5 mL. El set HF20 tiene un cebado de 58 mL. ¿Qué implica esto para el cebado del circuito?",
+ options:[
+   {t:"El volumen de cebado del set ya excede el límite del 10% de la volemia, por lo que debe considerarse cebado con albúmina al 5% o sangre en vez de solo cristaloide.", c:true},
+   {t:"No hay ningún problema, porque el cebado inicial siempre se hace con cristaloide sin excepción.", c:false},
+   {t:"Debe usarse un set más grande (M100) para reducir el volumen de cebado.", c:false},
+   {t:"El límite del 10% solo aplica a pacientes mayores de 20 kg, por lo que puede ignorarse aquí.", c:false}
+ ],
+ feedback:"Cuando el volumen extracorpóreo se acerca o supera el 10% de la volemia —frecuente por debajo de ~10 kg—, conviene cebar con albúmina al 5% o sangre para prevenir hemodilución e hipotensión al conectar al paciente.",
+ hint:"Revise la \"regla del 10%\" y los criterios de cebado especial en \"Acceso vascular\"."},
+{id:4, title:"Selección del set de filtro",
+ q:"Considerando el peso del paciente (7 kg) y la superficie de filtro objetivo (0.8-1× la superficie corporal), ¿qué set de la plataforma Prismaflex es el más adecuado en primera instancia?",
+ options:[
+   {t:"HF20 (0.2 m², flujo mínimo 20 mL/min), el más pequeño disponible.", c:true},
+   {t:"M150 (1.5 m², flujo mínimo 100 mL/min).", c:false},
+   {t:"M100 (0.9-1.0 m², flujo mínimo 75 mL/min).", c:false},
+   {t:"M60 (0.6 m², flujo mínimo 50 mL/min), porque siempre se prefiere el set intermedio.", c:false}
+ ],
+ feedback:"El HF20 está indicado para lactantes con superficie corporal <0.5 m² y es el set más pequeño de la plataforma, adecuado para minimizar el volumen extracorpóreo en un paciente de 7 kg.",
+ hint:"Revise la tabla de selección de set según peso en \"Circuito y Prismaflex\"."},
+{id:5, title:"Montaje del circuito",
+ q:"Al montar el circuito, ¿cuál es la disposición correcta del flujo sanguíneo y de los elementos de seguridad en la línea de retorno?",
+ options:[
+   {t:"La sangre sale del paciente por la luz roja (arterial) hacia la bomba y el filtro, y regresa por la luz azul (venosa); antes de llegar al paciente atraviesa el detector de aire y el clamp de seguridad.", c:true},
+   {t:"La sangre sale por la luz azul y regresa por la luz roja; el detector de aire se ubica antes del filtro.", c:false},
+   {t:"El detector de aire y el clamp se ubican en la línea arterial, antes de la bomba de sangre.", c:false},
+   {t:"No existen elementos de seguridad adicionales en la línea de retorno; solo se monitoriza la presión.", c:false}
+ ],
+ feedback:"Por convención, la luz \"arterial\" (roja) extrae sangre del paciente y la \"venosa\" (azul) la retorna. La línea de retorno incorpora un detector de aire y un clamp como elementos de seguridad antes de que la sangre reingrese al paciente.",
+ hint:"Revise los puntos calientes de la figura del circuito en \"Circuito y Prismaflex\"."},
+{id:6, title:"Anticoagulación: dosis inicial",
+ q:"Se decide anticoagulación regional con citrato diluido (Regiocit 18 mmol/L). ¿Cuál es la dosis inicial de citrato y el flujo de sangre inicial recomendados?",
+ options:[
+   {t:"Dosis inicial de citrato 3 mmol/L, con flujo de sangre (Qb) inicial de 3-4 mL/kg/min.", c:true},
+   {t:"Dosis inicial de citrato 18 mmol/L puros, sin diluir, con Qb de 10 mL/kg/min.", c:false},
+   {t:"Dosis inicial de citrato 0.5 mmol/L, con Qb de 1 mL/kg/min.", c:false},
+   {t:"La dosis de citrato no depende del Qb y puede iniciarse en cualquier valor arbitrario.", c:false}
+ ],
+ feedback:"El protocolo inicia con una dosis de citrato de 3 mmol/L y un flujo de sangre de 3-4 mL/kg/min, ajustando ambos según el iCa posfiltro y la tolerancia hemodinámica.",
+ hint:"Revise el protocolo de 8 pasos de citrato diluido en \"Anticoagulación\"."},
+{id:7, title:"Metas de calcio iónico",
+ q:"Durante la titulación del citrato, ¿cuáles son las metas correctas de calcio iónico posfiltro (circuito) y sistémico (paciente)?",
+ options:[
+   {t:"iCa posfiltro entre 0.25-0.45 mmol/L (puerto azul del Prismaflex) e iCa sistémico ≥0.9 mmol/L (línea arterial).", c:true},
+   {t:"iCa posfiltro ≥1.3 mmol/L e iCa sistémico ≤0.5 mmol/L.", c:false},
+   {t:"Ambos valores deben mantenerse iguales, en torno a 1.0 mmol/L.", c:false},
+   {t:"El iCa posfiltro no se mide de forma rutinaria; solo se controla el iCa sistémico.", c:false}
+ ],
+ feedback:"El iCa posfiltro bajo (0.25-0.45 mmol/L) confirma anticoagulación regional eficaz del circuito; el iCa sistémico ≥0.9 mmol/L evita la hipocalcemia del paciente. Si cae por debajo de 0.9, se administran 10 mL de CaCl₂ al 10% por vía central.",
+ hint:"Revise la tabla de metas de monitoreo del citrato en \"Anticoagulación\"."},
+{id:8, title:"Dosis de efluente y fracción de filtración",
+ q:"Se prescribe una dosis de efluente de 30 mL/kg/h para este paciente de 7 kg. ¿A cuántos mL/h equivale, y qué límite de fracción de filtración debe respetarse?",
+ options:[
+   {t:"210 mL/h de efluente (30 × 7), manteniendo la fracción de filtración por debajo de 20-25%.", c:true},
+   {t:"700 mL/h de efluente, sin ningún límite de fracción de filtración.", c:false},
+   {t:"30 mL/h de efluente, con fracción de filtración objetivo mayor al 50%.", c:false},
+   {t:"2100 mL/h de efluente, ya que a mayor dosis siempre es mejor el aclaramiento.", c:false}
+ ],
+ feedback:"30 mL/kg/h × 7 kg = 210 mL/h, dentro del rango recomendado (25-35 mL/kg/h prescritos). La fracción de filtración debe mantenerse por debajo de 20-25% para evitar la hemoconcentración y la coagulación del filtro.",
+ hint:"Revise el cálculo de dosis de efluente en \"Programación y balance\"."},
+{id:9, title:"Homeostasis líquida",
+ q:"El objetivo es revertir gradualmente la sobrecarga del 20% sin comprometer la precarga en un paciente con VIS 60. ¿Cuál es la estrategia de ultrafiltración neta más segura para iniciar?",
+ options:[
+   {t:"Iniciar con una tasa de ultrafiltración neta de 0 mL/h (balance neutro) e incrementar gradualmente según la tolerancia hemodinámica, dentro del límite de 0.5-2 mL/kg/h.", c:true},
+   {t:"Retirar de inmediato el 20% del peso corporal en las primeras 6 horas.", c:false},
+   {t:"No remover líquido en ningún momento mientras el paciente reciba vasopresores.", c:false},
+   {t:"Programar una remoción fija de 100 mL/kg/h independientemente del estado hemodinámico.", c:false}
+ ],
+ feedback:"En el niño hemodinámicamente inestable —como este paciente con VIS 60— la remoción neta se inicia en 0 mL/h y se incrementa gradualmente conforme mejora la estabilidad y la acidosis, respetando el límite de seguridad de 0.5-2 mL/kg/h.",
+ hint:"Revise el límite de seguridad de ultrafiltración en \"Programación y balance\"."},
+{id:10, title:"Monitoreo prioritario",
+ q:"Considerando el choque séptico y el VIS elevado de este paciente, ¿qué vigilancia adicional cobra especial relevancia durante las primeras horas de citrato regional?",
+ options:[
+   {t:"Vigilancia estrecha de acumulación de citrato (relación tCa/iCa) por el riesgo de hipoperfusión hepática y muscular que compromete su metabolismo.", c:true},
+   {t:"Ninguna vigilancia adicional; el protocolo de citrato es idéntico independientemente del estado hemodinámico.", c:false},
+   {t:"Solo vigilancia de la glucemia, sin relación con el citrato.", c:false},
+   {t:"Suspender de inmediato cualquier monitoreo de calcio, ya que no aporta información en el choque séptico.", c:false}
+ ],
+ feedback:"El choque séptico grave con hipoperfusión se asocia a acumulación/bloqueo por citrato, porque limita su metabolismo hepático y muscular a bicarbonato. La relación tCa/iCa y la necesidad creciente de calcio deben vigilarse de cerca.",
+ hint:"Revise la sección de toxicidad por citrato en \"Anticoagulación\"."}
+];
+
+const TROUBLESHOOT = [
+{id:"conexion", title:"Escenario A · Conexión a la máquina",
+ scenario:"A los 20 minutos de iniciada la terapia, suena la alarma de presión de acceso, que registra −165 mmHg. El flujo de sangre se detiene de forma automática.",
+ q:"¿Cuál es la conducta inicial más apropiada?",
+ options:[
+   {t:"Revisar si la línea está acodada o clampada y si el catéter está coagulado o contra la pared del vaso; si hay hipovolemia, considerar detener la ultrafiltración y reducir el flujo de sangre.", c:true},
+   {t:"Aumentar de inmediato el flujo de sangre programado para forzar el paso.", c:false},
+   {t:"Administrar un bolo de citrato adicional, ya que toda alarma de presión se relaciona con anticoagulación insuficiente.", c:false},
+   {t:"Ignorar la alarma si el paciente está clínicamente estable.", c:false}
+ ],
+ feedback:"Una presión de acceso muy negativa (<−150 mmHg) sugiere relleno inadecuado del segmento de bomba por acceso deficiente. Debe descartarse acodamiento, coagulación de la línea o posición del catéter contra la pared del vaso (considerando intercambiar los lúmenes) y, si hay hipovolemia, reducir la ultrafiltración y el flujo de sangre."},
+{id:"anticoagulacion", title:"Escenario B · Anticoagulación",
+ scenario:"A las 6 horas de iniciada la HDFVVC, el laboratorio informa calcio total 2.8 mmol/L y calcio iónico sistémico 0.9 mmol/L (relación tCa/iCa ≈3.1). El iCa posfiltro está en 0.3 mmol/L, dentro de meta.",
+ q:"¿Qué interpretación y conducta son las más apropiadas?",
+ options:[
+   {t:"La relación tCa/iCa >2.5 sugiere acumulación de citrato, probablemente relacionada con la hipoperfusión del choque séptico; debe considerarse reducir la dosis de citrato y evaluar alternativas, sin basarse en el calcio corregido.", c:true},
+   {t:"El resultado es normal y no requiere ninguna acción, ya que el iCa posfiltro está en meta.", c:false},
+   {t:"Debe aumentarse la dosis de citrato porque el iCa posfiltro está demasiado bajo.", c:false},
+   {t:"El calcio total elevado indica sobredosis de gluconato de calcio y debe suspenderse toda suplementación de calcio.", c:false}
+ ],
+ feedback:"Una relación tCa/iCa >2.5 (con calcio total, no corregido) es un marcador subrogado de acumulación de citrato, especialmente relevante en pacientes con hipoperfusión hepática o muscular, como este paciente con choque séptico y VIS elevado. Aunque el iCa posfiltro esté en meta, debe reevaluarse la dosis de citrato y considerar alternativas si progresa la acumulación."}
+];
+
+function renderWorkshop(){
+  document.getElementById("case-text").textContent = CASE_TEXT;
+  const root = document.getElementById("workshop-root");
+
+  const doneSteps = Object.keys(STATE.m5_steps_done).filter(k=>STATE.m5_steps_done[k]).length;
+  const doneTS = Object.keys(STATE.m5_ts_done).filter(k=>STATE.m5_ts_done[k]).length;
+
+  if(doneSteps >= WORKSHOP_STEPS.length && doneTS >= TROUBLESHOOT.length){
+    root.innerHTML = `
+      <div class="done-banner">
+        <h3>✓ Taller completado</h3>
+        <p>Ha finalizado el montaje paso a paso y los dos escenarios de solución de problemas. El taller práctico solo puede realizarse una vez; este resultado es definitivo y ha quedado registrado.</p>
+      </div>`;
+    return;
+  }
+
+  let currentStepIdx = WORKSHOP_STEPS.findIndex(s=>!STATE.m5_steps_done[s.id]);
+  if(currentStepIdx === -1){
+    renderTroubleshoot(root, doneTS);
+    return;
+  }
+
+  const stepper = document.createElement("div");
+  stepper.className = "stepper";
+  WORKSHOP_STEPS.forEach(function(s,i){
+    const dot = document.createElement("span");
+    dot.className = "step-dot" + (STATE.m5_steps_done[s.id] ? " done" : (i===currentStepIdx ? " current":""));
+    dot.textContent = STATE.m5_steps_done[s.id] ? "✓" : (i+1);
+    dot.title = s.title;
+    stepper.appendChild(dot);
+  });
+
+  const step = WORKSHOP_STEPS[currentStepIdx];
+  const card = document.createElement("div");
+  card.className = "workshop-card";
+  card.innerHTML = `
+    <h3>Paso ${currentStepIdx+1} de ${WORKSHOP_STEPS.length} — ${step.title}</h3>
+    <p>${step.q}</p>
+    <ul class="quiz-options" id="ws-options"></ul>
+    <div class="quiz-feedback" id="ws-feedback"></div>
+    <div class="workshop-hint" id="ws-hint"></div>
+    <div style="display:flex; gap:.6rem; flex-wrap:wrap; margin-top:.9rem">
+      <button class="quiz-nav-btn" id="ws-hint-btn" style="background:var(--amber-500)">Ver pista</button>
+      <button class="quiz-nav-btn" id="ws-next-btn" disabled>Continuar</button>
+    </div>
+  `;
+
+  root.innerHTML = "";
+  root.appendChild(stepper);
+  root.appendChild(card);
+
+  const ul = document.getElementById("ws-options");
+  const optOrder = shuffle(step.options);
+  let answered = false;
+  optOrder.forEach(function(opt){
+    const li = document.createElement("li");
+    li.innerHTML = `<label><input type="radio" name="ws-opt"> <span>${opt.t}</span></label>`;
+    ul.appendChild(li);
+    li.querySelector("input").addEventListener("change", function(){
+      if(answered) return;
+      answered = true;
+      document.querySelectorAll("#ws-options input").forEach(i=>i.disabled=true);
+      li.classList.add(opt.c ? "correct":"incorrect");
+      if(!opt.c){
+        optOrder.forEach(function(o2){ if(o2.c){ Array.from(ul.children).forEach(function(liEl){
+          if(liEl.textContent.trim().startsWith(o2.t.slice(0,15))) liEl.classList.add("correct");
+        }); } });
+      }
+      const fb = document.getElementById("ws-feedback");
+      fb.classList.add("show", opt.c?"ok":"bad");
+      fb.innerHTML = (opt.c ? "<strong>Correcto.</strong> " : "<strong>No es la mejor conducta.</strong> ") + step.feedback;
+      document.getElementById("ws-next-btn").disabled = false;
+      if(!STATE.m5_attempts[step.id]) STATE.m5_attempts[step.id] = [];
+      const _attempt = {chosenText:opt.t, correct:opt.c, at:new Date().toISOString()};
+      STATE.m5_attempts[step.id].push(_attempt);
+      if(opt.c){
+        STATE.m5_steps_done[step.id] = true;
+      }
+      saveState();
+      cloudPost("m5Attempt", {userId:CURRENT_USER_ID, stepId:step.id, stepTitle:step.title, attemptNum:STATE.m5_attempts[step.id].length, chosenText:_attempt.chosenText, correct:_attempt.correct, at:_attempt.at});
+    });
+  });
+
+  document.getElementById("ws-hint-btn").addEventListener("click", function(){
+    const hintBox = document.getElementById("ws-hint");
+    hintBox.textContent = "Pista: " + step.hint;
+    hintBox.classList.add("show");
+  });
+
+  document.getElementById("ws-next-btn").addEventListener("click", function(){
+    renderWorkshop();
+  });
+}
+
+function renderTroubleshoot(root, doneTS){
+  const idx = TROUBLESHOOT.findIndex(t=>!STATE.m5_ts_done[t.id]);
+  const ts = TROUBLESHOOT[idx];
+  root.innerHTML = `
+    <div class="callout tip" style="margin-bottom:1.1rem"><strong>Montaje completado.</strong> Ahora resuelva los dos escenarios de solución de problemas (${doneTS}/${TROUBLESHOOT.length} completados).</div>
+    <div class="workshop-card">
+      <h3>${ts.title}</h3>
+      <div class="ts-scenario">${ts.scenario}</div>
+      <p><strong>${ts.q}</strong></p>
+      <ul class="quiz-options" id="ts-options"></ul>
+      <div class="quiz-feedback" id="ts-feedback"></div>
+      <button class="quiz-nav-btn" id="ts-next-btn" disabled>Continuar</button>
+    </div>
+  `;
+  const ul = document.getElementById("ts-options");
+  const optOrder = shuffle(ts.options);
+  let answered = false;
+  optOrder.forEach(function(opt){
+    const li = document.createElement("li");
+    li.innerHTML = `<label><input type="radio" name="ts-opt"> <span>${opt.t}</span></label>`;
+    ul.appendChild(li);
+    li.querySelector("input").addEventListener("change", function(){
+      if(answered) return;
+      answered = true;
+      document.querySelectorAll("#ts-options input").forEach(i=>i.disabled=true);
+      li.classList.add(opt.c ? "correct":"incorrect");
+      if(!opt.c){
+        optOrder.forEach(function(o2){ if(o2.c){ Array.from(ul.children).forEach(function(liEl){
+          if(liEl.textContent.trim().startsWith(o2.t.slice(0,15))) liEl.classList.add("correct");
+        }); } });
+      }
+      const fb = document.getElementById("ts-feedback");
+      fb.classList.add("show", opt.c?"ok":"bad");
+      fb.innerHTML = (opt.c ? "<strong>Correcto.</strong> " : "<strong>No es la mejor conducta.</strong> ") + ts.feedback;
+      document.getElementById("ts-next-btn").disabled = false;
+      if(!STATE.m5_ts_attempts[ts.id]) STATE.m5_ts_attempts[ts.id] = [];
+      const _tsAttempt = {chosenText:opt.t, correct:opt.c, at:new Date().toISOString()};
+      STATE.m5_ts_attempts[ts.id].push(_tsAttempt);
+      if(opt.c){ STATE.m5_ts_done[ts.id] = true; }
+      saveState();
+      cloudPost("m5TsAttempt", {userId:CURRENT_USER_ID, stepId:ts.id, stepTitle:ts.title, attemptNum:STATE.m5_ts_attempts[ts.id].length, chosenText:_tsAttempt.chosenText, correct:_tsAttempt.correct, at:_tsAttempt.at});
+    });
+  });
+  document.getElementById("ts-next-btn").addEventListener("click", function(){ renderWorkshop(); });
+}
+
+/* ============================================================
+   9. BIBLIOGRAFÍA (referencias APA numeradas)
+   ============================================================ */
+const ART = "articulos/";
+const REFERENCES = [
+{num:1, file:ART+"s00431-023-05318-0.pdf", filename:"Cortina-et-al-2024-ESPNIC.pdf", sizeNote:"1.1 MB",
+ apa:'Cortina, G., Daverio, M., Demirkol, D., Chanchlani, R., &amp; Deep, A. (2024). Continuous renal replacement therapy in neonates and children: What does the pediatrician need to know? An overview from the Critical Care Nephrology Section of the European Society of Paediatric and Neonatal Intensive Care (ESPNIC). <em>European Journal of Pediatrics, 183</em>(2), 529–541. https://doi.org/10.1007/s00431-023-05318-0'},
+{num:2, file:ART+"s13312-026-00281-z.pdf", filename:"Dasgupta-et-al-2026.pdf", sizeNote:"0.7 MB",
+ apa:'Dasgupta, D., Sinha, R., &amp; Deep, A. (2026). Continuous kidney replacement therapy in pediatric intensive care: A practical guide for clinicians. <em>Indian Pediatrics, 63</em>(3), 275–283. https://doi.org/10.1007/s13312-026-00281-z'},
+{num:3, file:ART+"Manual_TRRC_Pediatria_UCIP%20(2).pdf", filename:"Herrera-Manual-TRRC-UCIP-2026.pdf", sizeNote:"5.1 MB",
+ apa:'Herrera, H., &amp; Claude (Anthropic). (2026). <em>Manual clínico y operativo: Terapia de reemplazo renal continua (TRRC) en pediatría</em> [Documento de referencia para fellows de UCIP]. Hospital Pablo Tobón Uribe / Hospital General de Medellín.'},
+{num:4, file:ART+"2016%20Continuous%20Renal%20Replacement%20Therapy%201.pdf", filename:"Kellum-Bellomo-Ronco-2016-CRRT.pdf", sizeNote:"20.9 MB",
+ apa:'Kellum, J. A., Bellomo, R., &amp; Ronco, C. (Eds.). (2016). <em>Continuous renal replacement therapy</em> (2.ª ed.). Oxford University Press.'},
+{num:5, file:ART+"jacalvache,+Terapia.pdf", filename:"Pantoja-Gomez-et-al-2021.pdf", sizeNote:"0.6 MB",
+ apa:'Pantoja-Gómez, O. C., Mondragón-Gaviria, M. V., Lasso-Florez, A. C., &amp; Lasso-Palomino, R. E. (2021). Terapia de reemplazo renal continua en niños: De los conceptos a la prescripción. <em>Revista de la Facultad de Ciencias de la Salud de la Universidad del Cauca, 23</em>(1), 32–46. https://doi.org/10.47373/rfcs.2021.v23.1924'},
+{num:6, file:ART+"000545674.pdf", filename:"Sethi-Tolwani-et-al-2025.pdf", sizeNote:"1.4 MB",
+ apa:'Sethi, S. K., Tolwani, A., Ashruf, O. S., Aggarwal, M., Bhatt, G. C., Nair, A., Soni, K., Savita, S., Bansal, S. B., Alhasan, K., Bunchman, T., &amp; Raina, R. (2025). Diluted regional citrate anticoagulation for continuous renal replacement therapy in pediatric patients: A systematic review and suggested practice points. <em>Blood Purification, 54</em>(8), 455–473. https://doi.org/10.1159/000545674'}
+];
+
+function stripTags(s){ return s.replace(/<[^>]+>/g,""); }
+
+/* Descarga un Blob como archivo, con manejo defensivo de errores para
+   navegadores que no implementen alguna de estas APIs estándar. */
+function downloadBlob(content, filename, mime){
+  try{
+    const blob = new Blob([content], {type:mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ try{ URL.revokeObjectURL(url); }catch(e){} }, 1000);
+  }catch(err){
+    alert("No fue posible generar la descarga en este navegador.");
+  }
+}
+
+function renderBibliography(){
+  const list = document.getElementById("biblio-list");
+  list.innerHTML = "";
+  REFERENCES.forEach(function(ref){
+    const li = document.createElement("li");
+    li.id = "ref-"+ref.num;
+    li.innerHTML = '<span class="ref-num">['+ref.num+']</span> '+ref.apa+
+      '<div class="ref-pdf-row"><a class="ref-pdf-link" href="'+ref.file+'" download="'+ref.filename+'" target="_blank" rel="noopener" aria-label="Descargar el PDF original de la referencia '+ref.num+'">'+
+      '<span aria-hidden="true">📄</span> Descargar PDF original <span class="ref-pdf-size">('+ref.sizeNote+')</span></a></div>';
+    list.appendChild(li);
+  });
+
+  const toggleBtn = document.getElementById("biblio-toggle-btn");
+  toggleBtn.addEventListener("click", function(){
+    const open = list.classList.toggle("open");
+    toggleBtn.setAttribute("aria-expanded", open ? "true":"false");
+  });
+
+  document.getElementById("biblio-download-btn").addEventListener("click", function(){
+    const lines = [
+      "TERAPIAS DE REEMPLAZO RENAL CONTINUAS",
+      "Referencias bibliográficas (normas APA, 7.ª edición)",
+      "Autor de la aplicación: Hernán Herrera · Versión 1 · 2026",
+      ""
+    ];
+    REFERENCES.forEach(function(ref){ lines.push("["+ref.num+"] "+stripTags(ref.apa)); lines.push(""); });
+    downloadBlob(lines.join("\n"), "bibliografia_TRRC_HernanHerrera_2026.txt", "text/plain;charset=utf-8");
+  });
+
+  document.getElementById("biblio-pdf-btn").addEventListener("click", downloadBibliographyAsPDF);
+
+  // Delegación: clic en cualquier cita del contenido abre y resalta la referencia
+  document.addEventListener("click", function(e){
+    const link = e.target.closest(".cite-link");
+    if(!link) return;
+    e.preventDefault();
+    const num = link.getAttribute("data-refnum");
+    list.classList.add("open");
+    toggleBtn.setAttribute("aria-expanded","true");
+    const target = document.getElementById("ref-"+num);
+    if(target){
+      if(typeof target.scrollIntoView === "function"){
+        try{ target.scrollIntoView({behavior:"smooth", block:"center"}); }catch(err){ try{ target.scrollIntoView(true); }catch(err2){} }
+      }
+      target.classList.add("flash");
+      setTimeout(function(){ target.classList.remove("flash"); }, 1600);
+    }
+  });
+}
+
+/* Genera un PDF real de la bibliografía usando el diálogo de impresión
+   nativo del navegador (100% offline, sin librerías externas). Se
+   construye un documento imprimible dentro de un iframe oculto y se
+   invoca window.print() sobre ese iframe; el usuario elige "Guardar
+   como PDF" como destino de impresión, igual que con un archivo PDF
+   original. */
+/* Helper genérico: construye un documento imprimible dentro de un iframe
+   oculto e invoca window.print() (100% offline, sin librerías externas).
+   El usuario elige "Guardar como PDF" como destino de impresión. */
+function printHTMLDocument(docTitle, bodyHTML, extraStyle){
+  const printDoc = '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">'+
+    '<title>'+docTitle+'</title>'+
+    '<style>'+
+    '@page{ margin:2cm 1.8cm; }'+
+    'body{ font-family:Georgia,"Times New Roman",serif; color:#111; margin:0; }'+
+    '.doc-header{ text-align:center; border-bottom:2px solid #0f2340; padding-bottom:.6rem; margin-bottom:1.4rem; }'+
+    '.doc-header h1{ font-size:1.35rem; margin:0 0 .25rem; color:#0f2340; }'+
+    '.doc-header p{ font-size:.85rem; color:#444; margin:.15rem 0; }'+
+    'h2{ font-size:1.05rem; color:#0f766e; border-bottom:1px solid #ccc; padding-bottom:.3rem; margin-top:1.2rem; }'+
+    'h3{ font-size:.95rem; color:#0f2340; margin:1rem 0 .3rem; }'+
+    'table{ width:100%; border-collapse:collapse; font-size:.8rem; margin:.4rem 0 1rem; page-break-inside:avoid; }'+
+    'table th, table td{ border:1px solid #ccc; padding:.3rem .5rem; text-align:left; }'+
+    'table th{ background:#0f2340; color:#fff; }'+
+    'ol.refs{ list-style:none; margin:0; padding:0; }'+
+    'ol.refs li{ font-size:.92rem; line-height:1.55; margin:0 0 .85rem 0; padding-left:2.1em; text-indent:-2.1em; }'+
+    '.ref-num{ font-weight:700; color:#0f766e; margin-right:.3rem; }'+
+    '.doc-footer{ margin-top:2rem; padding-top:.6rem; border-top:1px solid #ccc; font-size:.72rem; color:#666; text-align:center; }'+
+    '.user-block{ page-break-inside:avoid; margin-bottom:1.6rem; border-bottom:1px dashed #999; padding-bottom:1rem; }'+
+    (extraStyle||'')+
+    '</style></head><body>'+
+    '<div class="doc-header">'+
+      '<h1>Terapias de reemplazo renal continuas</h1>'+
+      '<p>Aplicación educativa interactiva &middot; Hernán Herrera &middot; Versión 1 &middot; 2026</p>'+
+    '</div>'+
+    bodyHTML+
+    '<div class="doc-footer">Documento generado localmente, sin conexión a internet, desde la aplicación «Terapias de reemplazo renal continuas».</div>'+
+    '</body></html>';
+
+  let frame = document.getElementById("pdf-print-frame");
+  if(!frame){
+    frame = document.createElement("iframe");
+    frame.id = "pdf-print-frame";
+    frame.setAttribute("aria-hidden","true");
+    frame.style.position = "fixed";
+    frame.style.right = "0";
+    frame.style.bottom = "0";
+    frame.style.width = "0";
+    frame.style.height = "0";
+    frame.style.border = "0";
+    frame.style.visibility = "hidden";
+    document.body.appendChild(frame);
+  }
+  const fdoc = frame.contentWindow.document;
+  fdoc.open();
+  fdoc.write(printDoc);
+  fdoc.close();
+
+  setTimeout(function(){
+    try{
+      frame.contentWindow.focus();
+      frame.contentWindow.print();
+    }catch(err){
+      alert("No fue posible abrir el diálogo de impresión en este navegador.");
+    }
+  }, 300);
+}
+
+function downloadBibliographyAsPDF(){
+  const refsHTML = REFERENCES.map(function(ref){
+    return '<li><span class="ref-num">['+ref.num+']</span> '+ref.apa+'</li>';
+  }).join("");
+  const body = '<h2>Referencias bibliográficas (normas APA, 7.ª edición)</h2>'+
+    '<ol class="refs">'+refsHTML+'</ol>';
+  printHTMLDocument("Bibliografia_TRRC_HernanHerrera_2026", body);
+}
+
+/* ============================================================
+   10. REGISTRO DE USUARIO (pantalla de acceso)
+   ============================================================ */
+function renderAuthOverlay(){
+  const root = document.getElementById("auth-overlay-root");
+  root.innerHTML =
+    '<div class="auth-overlay" role="dialog" aria-modal="true" aria-labelledby="auth-title">'+
+      '<div class="auth-card">'+
+        '<div class="auth-badge" aria-hidden="true">TRRC</div>'+
+        '<h2 id="auth-title">Registro de usuario</h2>'+
+        '<p class="auth-sub">Ingrese sus datos para comenzar o continuar su progreso en «Terapias de reemplazo renal continuas».</p>'+
+        '<div class="auth-error" id="auth-error"></div>'+
+        '<form id="auth-form" novalidate>'+
+          '<div class="auth-field"><label for="auth-name">Nombre completo</label>'+
+            '<input type="text" id="auth-name" autocomplete="name" required></div>'+
+          '<div class="auth-field"><label for="auth-email">Correo electrónico</label>'+
+            '<input type="email" id="auth-email" autocomplete="email" required></div>'+
+          '<div class="auth-field"><label for="auth-idrot">Identificación / Rotación</label>'+
+            '<input type="text" id="auth-idrot" autocomplete="off" required placeholder="Ej. Fellow UCIP · Rotación 3"></div>'+
+          '<button type="submit" class="auth-submit-btn">Comenzar</button>'+
+        '</form>'+
+        '<p class="auth-note">Sus datos y su progreso se guardan únicamente en este navegador, sin conexión a internet. Si ya se había registrado antes con este mismo correo, se retoma su progreso guardado.</p>'+
+        '<button type="button" class="auth-admin-link" id="auth-admin-link">Soy administrador</button>'+
+      '</div>'+
+    '</div>';
+
+  document.getElementById("auth-form").addEventListener("submit", function(e){
+    e.preventDefault();
+    const name = document.getElementById("auth-name").value.trim();
+    const email = document.getElementById("auth-email").value.trim();
+    const idRotation = document.getElementById("auth-idrot").value.trim();
+    const errBox = document.getElementById("auth-error");
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if(!name || !email || !idRotation){
+      errBox.textContent = "Por favor complete todos los campos.";
+      errBox.classList.add("show");
+      return;
+    }
+    if(!emailOk){
+      errBox.textContent = "Ingrese un correo electrónico válido.";
+      errBox.classList.add("show");
+      return;
+    }
+    errBox.classList.remove("show");
+    const id = upsertUser({name:name, email:email, idRotation:idRotation});
+    logInAsUser(id);
+  });
+
+  document.getElementById("auth-admin-link").addEventListener("click", showAdminLogin);
+}
+
+function logInAsUser(id){
+  setCurrentUserId(id);
+  CURRENT_USER_ID = id;
+  STATE = loadState(id);
+  document.getElementById("auth-overlay-root").innerHTML = "";
+  const shell = document.getElementById("app-shell");
+  shell.hidden = false;
+  renderContentModule();
+  initPodcast();
+  renderFlashcards();
+  renderQuiz();
+  renderWorkshop();
+  renderBibliography();
+  renderUserBar();
+  updateGlobalProgress();
+}
+
+function renderUserBar(){
+  const bar = document.getElementById("user-bar");
+  if(!bar || !CURRENT_USER_ID) return;
+  const reg = getRegistry();
+  const profile = reg[CURRENT_USER_ID] || {name:CURRENT_USER_ID};
+  bar.innerHTML = '<span class="user-chip"><span aria-hidden="true">👤</span> '+profile.name+'</span>'+
+    '<button class="user-switch-btn" id="user-switch-btn" type="button">Cambiar de usuario</button>';
+  document.getElementById("user-switch-btn").addEventListener("click", switchUser);
+}
+
+function switchUser(){
+  setCurrentUserId(null);
+  CURRENT_USER_ID = null;
+  document.getElementById("app-shell").hidden = true;
+  renderAuthOverlay();
+}
+
+/* ============================================================
+   11. PANEL DE ADMINISTRADOR
+   ============================================================ */
+function showAdminLogin(){
+  const root = document.getElementById("admin-overlay-root");
+  let authed = false;
+  try{ authed = sessionStorage.getItem(ADMIN_SESSION_KEY) === "1"; }catch(e){}
+  if(authed){ renderAdminDashboard(); return; }
+
+  root.innerHTML =
+    '<div class="admin-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-login-title">'+
+      '<div class="admin-login-card">'+
+        '<h2 id="admin-login-title" style="text-align:center">Acceso de administrador</h2>'+
+        '<p class="auth-sub">Ingrese la clave de administrador para consultar los registros de los fellows.</p>'+
+        '<div class="auth-error" id="admin-login-error"></div>'+
+        '<form id="admin-login-form">'+
+          '<div class="auth-field"><label for="admin-pass">Clave de administrador</label>'+
+            '<input type="password" id="admin-pass" autocomplete="off" required></div>'+
+          '<button type="submit" class="auth-submit-btn">Ingresar</button>'+
+        '</form>'+
+        '<button type="button" class="user-switch-btn" id="admin-cancel-btn" style="display:block;margin:1rem auto 0;">Cancelar</button>'+
+      '</div>'+
+    '</div>';
+
+  document.getElementById("admin-login-form").addEventListener("submit", function(e){
+    e.preventDefault();
+    const val = document.getElementById("admin-pass").value;
+    if(val === ADMIN_PASSWORD){
+      try{ sessionStorage.setItem(ADMIN_SESSION_KEY, "1"); }catch(err){}
+      renderAdminDashboard();
+    } else {
+      const err = document.getElementById("admin-login-error");
+      err.textContent = "Clave incorrecta.";
+      err.classList.add("show");
+    }
+  });
+  document.getElementById("admin-cancel-btn").addEventListener("click", function(){ root.innerHTML = ""; });
+}
+
+function computeUserSummary(userId){
+  const st = loadState(userId);
+  const m4Correct = Object.values(st.m4_answers).filter(function(a){return a.correct;}).length;
+  const m4Total = QUIZ.length;
+  const m5Done = Object.keys(st.m5_steps_done).filter(function(k){return st.m5_steps_done[k];}).length;
+  const m5Total = WORKSHOP_STEPS.length;
+  const tsDone = Object.keys(st.m5_ts_done).filter(function(k){return st.m5_ts_done[k];}).length;
+  const tsTotal = TROUBLESHOOT.length;
+  const m1Done = Object.keys(st.m1_sections_read).filter(function(k){return st.m1_sections_read[k];}).length;
+  const m1Total = CONTENT_SECTIONS.length;
+  const m3Done = Object.keys(st.m3_cards_flipped).filter(function(k){return st.m3_cards_flipped[k];}).length;
+  const m3Total = FLASHCARDS.length;
+  const overallPct = Math.round((((m1Total?m1Done/m1Total:0)+(st.m2_played?1:0)+(m3Total?m3Done/m3Total:0)+(st.m4_completed?1:0)+((m5Total+tsTotal)?(m5Done+tsDone)/(m5Total+tsTotal):0))/5)*100);
+  return {st:st, m4Correct:m4Correct, m4Total:m4Total, m5Done:m5Done, m5Total:m5Total, tsDone:tsDone, tsTotal:tsTotal, overallPct:overallPct};
+}
+
+function escapeHTML(s){
+  return String(s==null?"":s).replace(/[&<>]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c]; });
+}
+
+function buildM4Table(st){
+  if(Object.keys(st.m4_answers).length===0){
+    return '<p style="font-size:.85rem;color:#666">Aún no ha respondido la evaluación sumativa.</p>';
+  }
+  const rows = QUIZ.map(function(q){
+    const a = st.m4_answers[q.id];
+    if(!a){
+      return '<tr><td>'+q.id+'</td><td>'+escapeHTML(q.q)+'</td><td colspan="2" style="color:#999">Sin responder</td></tr>';
+    }
+    return '<tr><td>'+q.id+'</td><td>'+escapeHTML(q.q)+'</td><td>'+escapeHTML(a.chosenText)+'</td>'+
+      '<td class="'+(a.correct?"ans-correct":"ans-incorrect")+'">'+(a.correct?"Correcta":"Incorrecta")+'</td></tr>';
+  }).join("");
+  return '<table class="admin-table"><tr><th>#</th><th>Pregunta</th><th>Respuesta elegida</th><th>Resultado</th></tr>'+rows+'</table>';
+}
+
+function buildM5Table(st){
+  const rows = WORKSHOP_STEPS.map(function(step){
+    const attempts = st.m5_attempts[step.id] || [];
+    const done = !!st.m5_steps_done[step.id];
+    const last = attempts.length ? attempts[attempts.length-1] : null;
+    return '<tr><td>'+escapeHTML(step.title)+'</td><td>'+attempts.length+'</td><td>'+(last?escapeHTML(last.chosenText):"—")+'</td>'+
+      '<td class="'+(done?"ans-correct":"ans-incorrect")+'">'+(done?"Completado":"Pendiente")+'</td></tr>';
+  }).join("");
+  const tsRows = TROUBLESHOOT.map(function(ts){
+    const attempts = st.m5_ts_attempts[ts.id] || [];
+    const done = !!st.m5_ts_done[ts.id];
+    const last = attempts.length ? attempts[attempts.length-1] : null;
+    return '<tr><td>'+escapeHTML(ts.title)+'</td><td>'+attempts.length+'</td><td>'+(last?escapeHTML(last.chosenText):"—")+'</td>'+
+      '<td class="'+(done?"ans-correct":"ans-incorrect")+'">'+(done?"Completado":"Pendiente")+'</td></tr>';
+  }).join("");
+  return '<table class="admin-table"><tr><th>Paso de montaje</th><th>N.º intentos</th><th>Última respuesta elegida</th><th>Resultado</th></tr>'+rows+'</table>'+
+    '<table class="admin-table"><tr><th>Escenario de solución de problemas</th><th>N.º intentos</th><th>Última respuesta elegida</th><th>Resultado</th></tr>'+tsRows+'</table>';
+}
+
+function safeId(id){ return String(id).replace(/[^a-z0-9]/gi, "_"); }
+
+function renderAdminDashboard(){
+  const root = document.getElementById("admin-overlay-root");
+  const reg = getRegistry();
+  const ids = Object.keys(reg).sort(function(a,b){ return (reg[b].lastActiveAt||"").localeCompare(reg[a].lastActiveAt||""); });
+
+  let usersHTML = "";
+  if(ids.length===0){
+    usersHTML = '<p class="admin-empty">Aún no hay fellows registrados en este navegador.</p>';
+  } else {
+    usersHTML = ids.map(function(id){
+      const summary = computeUserSummary(id);
+      const p = reg[id];
+      let regDate = "";
+      try{ regDate = p.registeredAt ? new Date(p.registeredAt).toLocaleString("es-CO",{dateStyle:"medium", timeStyle:"short"}) : ""; }catch(e){ regDate = p.registeredAt||""; }
+      const workshopTotal = summary.m5Total + summary.tsTotal;
+      const workshopDone = summary.m5Done + summary.tsDone;
+      return '<div class="admin-user-card">'+
+        '<div class="admin-user-head" data-uid="'+id+'">'+
+          '<div><div class="admin-user-id">'+escapeHTML(p.name)+'</div>'+
+            '<div class="admin-user-meta">'+escapeHTML(p.email)+' · '+escapeHTML(p.idRotation||"")+' · registrado '+regDate+'</div></div>'+
+          '<div class="admin-user-stats">'+
+            '<span class="admin-stat-pill">Progreso '+summary.overallPct+'%</span>'+
+            '<span class="admin-stat-pill '+(summary.st.m4_completed?"ok":"warn")+'">Sumativa '+summary.m4Correct+'/'+summary.m4Total+(summary.st.m4_completed?"":" (en curso)")+'</span>'+
+            '<span class="admin-stat-pill '+(workshopDone===workshopTotal?"ok":"warn")+'">Taller '+workshopDone+'/'+workshopTotal+'</span>'+
+          '</div>'+
+        '</div>'+
+        '<div class="admin-user-body" id="admin-body-'+safeId(id)+'">'+
+          '<div class="admin-subheading">Evaluación sumativa (Módulo 4)</div>'+
+          buildM4Table(summary.st)+
+          '<div class="admin-subheading">Taller práctico (Módulo 5)</div>'+
+          buildM5Table(summary.st)+
+        '</div>'+
+      '</div>';
+    }).join("");
+  }
+
+  root.innerHTML =
+    '<div class="admin-overlay" role="dialog" aria-modal="true" aria-labelledby="admin-dash-title">'+
+      '<div class="admin-dashboard">'+
+        '<div class="admin-dash-head">'+
+          '<h2 id="admin-dash-title">Panel de administrador</h2>'+
+          '<div style="display:flex;gap:.5rem;flex-wrap:wrap;">'+
+            '<button class="admin-btn alt" id="admin-close-btn">Volver a la aplicación</button>'+
+            '<button class="admin-btn danger" id="admin-logout-btn">Cerrar sesión admin</button>'+
+          '</div>'+
+        '</div>'+
+        '<div class="admin-toolbar">'+
+          '<button class="admin-btn" id="admin-cloud-sync-btn"'+(cloudSyncEnabled()?"":' disabled title="Configure SHEETS_API_URL en el código para activar la nube"')+'>☁ Sincronizar desde la nube</button>'+
+          '<button class="admin-btn" id="admin-export-btn">⬇ Exportar registros (.json)</button>'+
+          '<button class="admin-btn alt" id="admin-import-btn">⬆ Importar registros (.json)</button>'+
+          '<input type="file" id="admin-import-input" class="admin-file-input" accept="application/json">'+
+          '<button class="admin-btn alt" id="admin-print-btn">🖶 Imprimir / Guardar como PDF</button>'+
+        '</div>'+
+        '<p style="font-size:.78rem;color:#64748b;margin:-.6rem 0 1rem;">'+ids.length+' fellow(s) registrado(s) en este navegador. Sincronización en la nube: '+
+          (cloudSyncEnabled() ? '<strong style="color:#15803d">activa</strong>' : '<strong style="color:#b91c1c">no configurada</strong>')+
+          '. Use «Exportar» en cada computador donde se use la app sin nube, y «Importar» aquí para consolidar registros manualmente.</p>'+
+        '<div id="admin-users-list">'+usersHTML+'</div>'+
+      '</div>'+
+    '</div>';
+
+  document.getElementById("admin-close-btn").addEventListener("click", function(){ root.innerHTML = ""; });
+  document.getElementById("admin-logout-btn").addEventListener("click", function(){
+    try{ sessionStorage.removeItem(ADMIN_SESSION_KEY); }catch(e){}
+    root.innerHTML = "";
+  });
+  document.querySelectorAll(".admin-user-head").forEach(function(head){
+    head.addEventListener("click", function(){
+      const uid = head.getAttribute("data-uid");
+      const body = document.getElementById("admin-body-"+safeId(uid));
+      if(body) body.classList.toggle("open");
+    });
+  });
+  document.getElementById("admin-cloud-sync-btn").addEventListener("click", syncFromCloud);
+  document.getElementById("admin-export-btn").addEventListener("click", exportRegistryJSON);
+  document.getElementById("admin-import-btn").addEventListener("click", function(){
+    document.getElementById("admin-import-input").click();
+  });
+  document.getElementById("admin-import-input").addEventListener("change", handleImportFile);
+  document.getElementById("admin-print-btn").addEventListener("click", function(){ printAdminReport(ids, reg); });
+}
+
+function exportRegistryJSON(){
+  const reg = getRegistry();
+  const payload = {exportedAt:new Date().toISOString(), app:"Terapias de reemplazo renal continuas", registry:reg, progress:{}};
+  Object.keys(reg).forEach(function(id){ payload.progress[id] = loadState(id); });
+  downloadBlob(JSON.stringify(payload, null, 2), "trrc_registros_"+(new Date().toISOString().slice(0,10))+".json", "application/json");
+}
+
+/* Fusiona un registro + progreso entrante (de un archivo importado o
+   de la nube) con lo que ya existe en este navegador. Conserva el
+   perfil más reciente por lastActiveAt y reemplaza el progreso del
+   usuario con la versión entrante (se asume que la fuente importada
+   es la más completa/actual). Devuelve el número de usuarios fusionados. */
+function mergeIncomingData(incomingRegistry, incomingProgress){
+  const reg = getRegistry();
+  let count = 0;
+  Object.keys(incomingRegistry||{}).forEach(function(id){
+    if(!reg[id] || (incomingRegistry[id].lastActiveAt||"") > (reg[id].lastActiveAt||"")){
+      reg[id] = incomingRegistry[id];
+    }
+    if(incomingProgress && incomingProgress[id]){
+      try{ localStorage.setItem(userProgressKey(id), JSON.stringify(incomingProgress[id])); }catch(err){}
+    }
+    count++;
+  });
+  saveRegistry(reg);
+  return count;
+}
+
+function handleImportFile(e){
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(){
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data.registry || !data.progress) throw new Error("Formato no reconocido");
+      const count = mergeIncomingData(data.registry, data.progress);
+      alert("Registros importados correctamente ("+count+" fellow(s)).");
+      renderAdminDashboard();
+    }catch(err){
+      alert("El archivo no tiene un formato válido de registros de esta aplicación.");
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+}
+
+/* ---------- Sincronización desde la nube (Google Sheets) ---------- */
+
+function buildRegistryFromCloudUsers(users){
+  const reg = {};
+  (users||[]).forEach(function(u){
+    reg[u.id] = {id:u.id, name:u.name, email:u.email, idRotation:u.idRotation, registeredAt:u.registeredAt, lastActiveAt:u.lastActiveAt};
+  });
+  return reg;
+}
+
+function buildProgressFromCloudRows(users, m4rows, m5rows){
+  const progress = {};
+  (users||[]).forEach(function(u){ progress[u.id] = defaultUserState(); });
+  function isTrue(v){ return v===true || v==="true" || v==="TRUE" || v===1; }
+  (m4rows||[]).forEach(function(r){
+    if(!progress[r.userId]) progress[r.userId] = defaultUserState();
+    if(r.questionId === "COMPLETADO"){
+      progress[r.userId].m4_completed = true;
+      progress[r.userId].m4_completedAt = r.at;
+    } else {
+      progress[r.userId].m4_answers[r.questionId] = {chosenText:r.chosenText, correct:isTrue(r.correct), at:r.at};
+    }
+  });
+  (m5rows||[]).forEach(function(r){
+    if(!progress[r.userId]) progress[r.userId] = defaultUserState();
+    const correct = isTrue(r.correct);
+    const entry = {chosenText:r.chosenText, correct:correct, at:r.at};
+    if(r.kind === "montaje"){
+      if(!progress[r.userId].m5_attempts[r.stepId]) progress[r.userId].m5_attempts[r.stepId] = [];
+      progress[r.userId].m5_attempts[r.stepId].push(entry);
+      if(correct) progress[r.userId].m5_steps_done[r.stepId] = true;
+    } else {
+      if(!progress[r.userId].m5_ts_attempts[r.stepId]) progress[r.userId].m5_ts_attempts[r.stepId] = [];
+      progress[r.userId].m5_ts_attempts[r.stepId].push(entry);
+      if(correct) progress[r.userId].m5_ts_done[r.stepId] = true;
+    }
+  });
+  return progress;
+}
+
+function syncFromCloud(){
+  const btn = document.getElementById("admin-cloud-sync-btn");
+  if(!cloudSyncEnabled()){
+    alert("La sincronización en la nube no está configurada. Edite la constante SHEETS_API_URL en el código de la aplicación (ver instrucciones del autor).");
+    return;
+  }
+  if(btn){ btn.disabled = true; btn.textContent = "Sincronizando…"; }
+  cloudGetAll().then(function(data){
+    if(btn){ btn.disabled = false; btn.textContent = "☁ Sincronizar desde la nube"; }
+    if(!data || !data.ok){
+      alert("No fue posible conectar con la nube. Verifique su conexión a internet y que la URL de Apps Script esté bien configurada.");
+      return;
+    }
+    const reg = buildRegistryFromCloudUsers(data.users);
+    const prog = buildProgressFromCloudRows(data.users, data.m4, data.m5);
+    const count = mergeIncomingData(reg, prog);
+    alert("Sincronización completa: "+count+" fellow(s) actualizados desde la nube.");
+    renderAdminDashboard();
+  });
+}
+
+function printAdminReport(ids, reg){
+  let body = "<h2>Reporte consolidado — Panel de administrador</h2>";
+  if(ids.length===0){
+    body += "<p>No hay fellows registrados.</p>";
+  }
+  ids.forEach(function(id){
+    const summary = computeUserSummary(id);
+    const p = reg[id];
+    const workshopTotal = summary.m5Total + summary.tsTotal;
+    const workshopDone = summary.m5Done + summary.tsDone;
+    body += '<div class="user-block"><h3>'+escapeHTML(p.name)+' — '+escapeHTML(p.email)+' ('+escapeHTML(p.idRotation||"")+')</h3>'+
+      '<p style="font-size:.8rem;color:#444">Progreso general: '+summary.overallPct+'% &middot; Sumativa: '+summary.m4Correct+'/'+summary.m4Total+' &middot; Taller: '+workshopDone+'/'+workshopTotal+'</p>'+
+      buildM4Table(summary.st)+
+      buildM5Table(summary.st)+
+      "</div>";
+  });
+  printHTMLDocument("Reporte_Admin_TRRC_"+(new Date().toISOString().slice(0,10)), body);
+}
+
+/* ============================================================
+   12. INICIALIZACIÓN
+   ============================================================ */
+document.addEventListener("DOMContentLoaded", function(){
+  const adminBtn = document.getElementById("admin-entry-btn");
+  if(adminBtn) adminBtn.addEventListener("click", showAdminLogin);
+
+  const existingId = getCurrentUserId();
+  if(existingId && getRegistry()[existingId]){
+    logInAsUser(existingId);
+  } else {
+    renderAuthOverlay();
+  }
+});
+
+})();
+</script>
+</body>
+</html>
