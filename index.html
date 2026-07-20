@@ -83,7 +83,6 @@ header.app-header{
 .brand-text{display:flex; flex-direction:column; align-items:center;}
 .brand-text h1{color:#fff; margin:0; font-size:1.5rem; text-align:center;}
 .brand-text span{font-size:.72rem; color:#b9c8e0; letter-spacing:.02em;}
-.brand-text .brand-credit{color:var(--teal-400); font-weight:600; margin-top:.15rem;}
 
 .global-progress{width:100%; max-width:420px;}
 .global-progress .gp-label{display:flex; justify-content:space-between; font-size:.72rem; color:#c8d6ec; margin-bottom:.25rem;}
@@ -201,12 +200,11 @@ a.cite-link{
 a.cite-link:hover, a.cite-link:focus-visible{background:#dbeeec; text-decoration:underline; color:var(--teal-700,var(--teal-600));}
 
 /* ---------- BIBLIOGRAFÍA ---------- */
-.biblio-section{max-width:var(--maxw); margin:0 auto; padding:0 1.25rem 2rem;}
+.biblio-section{margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--line);}
 .biblio-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.3rem 1.4rem;}
 .biblio-head{display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:.6rem;}
 .biblio-head h2{border:none; margin:0;}
 .biblio-toggle-btn{background:var(--navy-800); color:#fff; border:none; padding:.5rem 1rem; border-radius:6px; font-weight:600; font-size:.82rem;}
-.biblio-note{font-size:.85rem; color:var(--ink-700); margin:.2rem 0 1rem;}
 .biblio-list{list-style:none; margin:0; padding:0; display:none;}
 .biblio-list.open{display:block;}
 .biblio-list li{
@@ -327,10 +325,22 @@ audio{width:100%; margin-top:.6rem;}
 footer.app-footer{background:var(--navy-950); color:#93a5c2; text-align:center; padding:1.4rem; font-size:.75rem;}
 footer.app-footer a{color:#c8d6ec;}
 
+.objectives-card{background:var(--card); border:1px solid var(--line); border-left:5px solid var(--teal-500); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.2rem 1.4rem; margin-bottom:1.25rem;}
+.objectives-card h3{margin-top:0;}
+.objectives-card p{margin:0 0 .6rem;}
+.objectives-card ul{margin:0; padding-left:1.3rem;}
+.objectives-card li{margin-bottom:.45rem; font-size:.92rem; color:var(--ink-700);}
+.objectives-card li:last-child{margin-bottom:0;}
+
+.credits-section{max-width:var(--maxw); margin:0 auto; padding:2rem 1.25rem 0;}
+.credits-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.4rem 1.6rem; text-align:center;}
+.credits-name{font-size:1.05rem; font-weight:700; color:var(--navy-900); margin:.4rem 0 .7rem;}
+.credits-list{list-style:none; margin:0; padding:0; color:var(--ink-700); font-size:.88rem;}
+.credits-list li{margin:.25rem 0;}
+
 @media (max-width:600px){
   h1{font-size:1.15rem;}
   .brand-text h1{font-size:1.05rem;}
-  .brand-text span:not(.brand-credit){display:none;}
   main{padding:1rem .8rem 3rem;}
   .fig-card{position:static;}
 }
@@ -426,8 +436,6 @@ footer.app-footer a{color:#c8d6ec;}
       <div class="brand-badge" aria-hidden="true">TRRC</div>
       <div class="brand-text">
         <h1>Terapias de reemplazo renal continuas</h1>
-        <span>Subespecialidad de Cuidado Intensivo Pediátrico</span>
-        <span class="brand-credit">Hernán Herrera · Versión 1 · 2026</span>
       </div>
     </div>
     <div class="global-progress" role="group" aria-label="Progreso general del curso">
@@ -456,8 +464,33 @@ footer.app-footer a{color:#c8d6ec;}
     <h2>Módulo 1 · Contenido</h2>
   </div>
 
+  <div class="objectives-card">
+    <h3>Objetivos académicos</h3>
+    <p>Al finalizar esta aplicación, el fellow de Cuidado Intensivo Pediátrico estará en capacidad de:</p>
+    <ul>
+      <li>Explicar los fundamentos físicos de la depuración extracorpórea (difusión, convección, ultrafiltración y adsorción) y las modalidades de TRRC que se derivan de ellos.</li>
+      <li>Establecer las indicaciones y el momento de inicio de la terapia, y seleccionar el acceso vascular y el catéter apropiados para el paciente pediátrico.</li>
+      <li>Describir el circuito extracorpóreo —volumen, cebado, selección del set de filtro y programación en la máquina Prismaflex.</li>
+      <li>Aplicar los principios de anticoagulación regional con citrato y sistémica con heparina, junto con sus metas de monitoreo.</li>
+      <li>Reconocer y resolver las alarmas y complicaciones más frecuentes del circuito, así como los principios de homeostasis líquida y destete de la terapia.</li>
+      <li>Ejecutar, en un caso clínico simulado, el montaje, purgado e inicio de la terapia, y resolver escenarios de solución de problemas del circuito.</li>
+    </ul>
+  </div>
+
   <div class="section-tablist" role="tablist" id="section-tablist" aria-label="Secciones del contenido"></div>
   <div id="content-sections"></div>
+
+  <section class="biblio-section" id="bibliografia" aria-label="Bibliografía">
+    <div class="biblio-card">
+      <div class="biblio-head">
+        <h2>Referencias bibliográficas</h2>
+        <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+          <button class="biblio-toggle-btn" id="biblio-toggle-btn" aria-expanded="false" aria-controls="biblio-list">Mostrar / ocultar</button>
+        </div>
+      </div>
+      <ol class="biblio-list" id="biblio-list"></ol>
+    </div>
+  </section>
 </section>
 
 <!-- ======================= MÓDULO 2: PODCAST ======================= -->
@@ -510,22 +543,21 @@ footer.app-footer a{color:#c8d6ec;}
 
 </main>
 
-<section class="biblio-section" id="bibliografia" aria-label="Bibliografía">
-  <div class="biblio-card">
-    <div class="biblio-head">
-      <h2>Referencias bibliográficas</h2>
-      <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
-        <button class="biblio-toggle-btn" id="biblio-toggle-btn" aria-expanded="false" aria-controls="biblio-list">Mostrar / ocultar</button>
-      </div>
-    </div>
-    <p class="biblio-note">Las citas dentro del contenido se identifican con números entre corchetes (p. ej. [3]); cada número remite a la referencia correspondiente en esta lista, ordenada alfabéticamente y formateada según las normas APA (7.ª edición). Al hacer clic en una cita del texto, esta sección se abre y se resalta la referencia. Cada referencia incluye su propio botón «📄 Descargar PDF original», que entrega el artículo o documento fuente tal como fue suministrado, sin necesidad de conexión a internet.</p>
-    <ol class="biblio-list" id="biblio-list"></ol>
+<section class="credits-section" aria-label="Créditos">
+  <div class="credits-card">
+    <h2>Créditos</h2>
+    <p class="credits-name">Hernán Darío Herrera Salazar, MD.</p>
+    <ul class="credits-list">
+      <li>Médico y cirujano, Universidad del Valle.</li>
+      <li>Pediatra e intensivista, Universidad CES.</li>
+      <li>Especialista en docencia para profesionales de salud, Universidad del Rosario – Pontificia Universidad Javeriana.</li>
+    </ul>
   </div>
 </section>
 
 <footer class="app-footer">
   <p>Aplicación educativa autocontenida · Contenido derivado exclusivamente de los artículos, gráficos, podcast e imágenes suministrados · Uso académico para fellows de UCIP</p>
-  <p>Autor: Hernán Herrera · Versión 1 · 2026</p>
+  <p>Versión 1, 2026</p>
   <button class="admin-entry-link" id="admin-entry-btn" type="button">Panel de administrador</button>
 </footer>
 
