@@ -206,8 +206,6 @@ a.cite-link:hover, a.cite-link:focus-visible{background:#dbeeec; text-decoration
 .biblio-head{display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:.6rem;}
 .biblio-head h2{border:none; margin:0;}
 .biblio-toggle-btn{background:var(--navy-800); color:#fff; border:none; padding:.5rem 1rem; border-radius:6px; font-weight:600; font-size:.82rem;}
-.biblio-download-btn{background:var(--teal-600); color:#fff; border:none; padding:.5rem 1rem; border-radius:6px; font-weight:600; font-size:.82rem; display:inline-flex; align-items:center; gap:.4rem;}
-.biblio-download-btn--alt{background:transparent; color:var(--teal-600); border:1px solid var(--teal-600);}
 .biblio-note{font-size:.85rem; color:var(--ink-700); margin:.2rem 0 1rem;}
 .biblio-list{list-style:none; margin:0; padding:0; display:none;}
 .biblio-list.open{display:block;}
@@ -518,11 +516,9 @@ footer.app-footer a{color:#c8d6ec;}
       <h2>Referencias bibliográficas</h2>
       <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
         <button class="biblio-toggle-btn" id="biblio-toggle-btn" aria-expanded="false" aria-controls="biblio-list">Mostrar / ocultar</button>
-        <button class="biblio-download-btn" id="biblio-pdf-btn">⬇ Descargar como PDF</button>
-        <button class="biblio-download-btn biblio-download-btn--alt" id="biblio-download-btn">⬇ Descargar como texto (.txt)</button>
       </div>
     </div>
-    <p class="biblio-note">Las citas dentro del contenido se identifican con números entre corchetes (p. ej. [3]); cada número remite a la referencia correspondiente en esta lista, ordenada alfabéticamente y formateada según las normas APA (7.ª edición). Al hacer clic en una cita del texto, esta sección se abre y se resalta la referencia. Los botones superiores descargan el <strong>listado completo</strong> de referencias (como PDF mediante el diálogo de impresión, o como texto plano). Cada referencia incluye además su propio botón «📄 Descargar PDF original», que entrega el artículo o documento fuente tal como fue suministrado, sin necesidad de conexión a internet.</p>
+    <p class="biblio-note">Las citas dentro del contenido se identifican con números entre corchetes (p. ej. [3]); cada número remite a la referencia correspondiente en esta lista, ordenada alfabéticamente y formateada según las normas APA (7.ª edición). Al hacer clic en una cita del texto, esta sección se abre y se resalta la referencia. Cada referencia incluye su propio botón «📄 Descargar PDF original», que entrega el artículo o documento fuente tal como fue suministrado, sin necesidad de conexión a internet.</p>
     <ol class="biblio-list" id="biblio-list"></ol>
   </div>
 </section>
@@ -1818,19 +1814,6 @@ function renderBibliography(){
     toggleBtn.setAttribute("aria-expanded", open ? "true":"false");
   });
 
-  document.getElementById("biblio-download-btn").addEventListener("click", function(){
-    const lines = [
-      "TERAPIAS DE REEMPLAZO RENAL CONTINUAS",
-      "Referencias bibliográficas (normas APA, 7.ª edición)",
-      "Autor de la aplicación: Hernán Herrera · Versión 1 · 2026",
-      ""
-    ];
-    REFERENCES.forEach(function(ref){ lines.push("["+ref.num+"] "+stripTags(ref.apa)); lines.push(""); });
-    downloadBlob(lines.join("\n"), "bibliografia_TRRC_HernanHerrera_2026.txt", "text/plain;charset=utf-8");
-  });
-
-  document.getElementById("biblio-pdf-btn").addEventListener("click", downloadBibliographyAsPDF);
-
   // Delegación: clic en cualquier cita del contenido abre y resalta la referencia
   document.addEventListener("click", function(e){
     const link = e.target.closest(".cite-link");
@@ -1915,15 +1898,6 @@ function printHTMLDocument(docTitle, bodyHTML, extraStyle){
       alert("No fue posible abrir el diálogo de impresión en este navegador.");
     }
   }, 300);
-}
-
-function downloadBibliographyAsPDF(){
-  const refsHTML = REFERENCES.map(function(ref){
-    return '<li><span class="ref-num">['+ref.num+']</span> '+ref.apa+'</li>';
-  }).join("");
-  const body = '<h2>Referencias bibliográficas (normas APA, 7.ª edición)</h2>'+
-    '<ol class="refs">'+refsHTML+'</ol>';
-  printHTMLDocument("Bibliografia_TRRC_HernanHerrera_2026", body);
 }
 
 /* ============================================================
