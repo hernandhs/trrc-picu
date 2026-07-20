@@ -200,7 +200,6 @@ a.cite-link{
 a.cite-link:hover, a.cite-link:focus-visible{background:#dbeeec; text-decoration:underline; color:var(--teal-700,var(--teal-600));}
 
 /* ---------- BIBLIOGRAFÍA ---------- */
-.biblio-section{margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--line);}
 .biblio-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.3rem 1.4rem;}
 .biblio-head{display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:.6rem;}
 .biblio-head h2{border:none; margin:0;}
@@ -332,7 +331,6 @@ footer.app-footer a{color:#c8d6ec;}
 .objectives-card li{margin-bottom:.45rem; font-size:.92rem; color:var(--ink-700);}
 .objectives-card li:last-child{margin-bottom:0;}
 
-.credits-section{max-width:var(--maxw); margin:0 auto; padding:2rem 1.25rem 0;}
 .credits-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:1.4rem 1.6rem; text-align:center;}
 .credits-name{font-size:1.05rem; font-weight:700; color:var(--navy-900); margin:.4rem 0 .7rem;}
 .credits-list{list-style:none; margin:0; padding:0; color:var(--ink-700); font-size:.88rem;}
@@ -453,6 +451,8 @@ footer.app-footer a{color:#c8d6ec;}
     <button class="mod-btn" role="tab" data-module="m3" aria-selected="false" id="tab-m3"><span class="num">3</span> Autoevaluación <span class="check" id="check-m3" hidden>✓</span></button>
     <button class="mod-btn" role="tab" data-module="m4" aria-selected="false" id="tab-m4"><span class="num">4</span> Evaluación sumativa <span class="check" id="check-m4" hidden>✓</span></button>
     <button class="mod-btn" role="tab" data-module="m5" aria-selected="false" id="tab-m5"><span class="num">5</span> Taller práctico <span class="check" id="check-m5" hidden>✓</span></button>
+    <button class="mod-btn" role="tab" data-module="m6" aria-selected="false" id="tab-m6"><span class="num">6</span> Bibliografía</button>
+    <button class="mod-btn" role="tab" data-module="m7" aria-selected="false" id="tab-m7"><span class="num">7</span> Créditos</button>
   </div>
 </nav>
 
@@ -479,18 +479,6 @@ footer.app-footer a{color:#c8d6ec;}
 
   <div class="section-tablist" role="tablist" id="section-tablist" aria-label="Secciones del contenido"></div>
   <div id="content-sections"></div>
-
-  <section class="biblio-section" id="bibliografia" aria-label="Bibliografía">
-    <div class="biblio-card">
-      <div class="biblio-head">
-        <h2>Referencias bibliográficas</h2>
-        <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
-          <button class="biblio-toggle-btn" id="biblio-toggle-btn" aria-expanded="false" aria-controls="biblio-list">Mostrar / ocultar</button>
-        </div>
-      </div>
-      <ol class="biblio-list" id="biblio-list"></ol>
-    </div>
-  </section>
 </section>
 
 <!-- ======================= MÓDULO 2: PODCAST ======================= -->
@@ -541,11 +529,28 @@ footer.app-footer a{color:#c8d6ec;}
   <div id="workshop-root"></div>
 </section>
 
-</main>
+<!-- ======================= MÓDULO 6: BIBLIOGRAFÍA ======================= -->
+<section class="module-panel" id="panel-m6" role="tabpanel" aria-labelledby="tab-m6">
+  <div class="module-intro">
+    <h2>Módulo 6 · Bibliografía</h2>
+  </div>
+  <div class="biblio-card">
+    <div class="biblio-head">
+      <h2>Referencias bibliográficas</h2>
+      <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+        <button class="biblio-toggle-btn" id="biblio-toggle-btn" aria-expanded="false" aria-controls="biblio-list">Mostrar / ocultar</button>
+      </div>
+    </div>
+    <ol class="biblio-list" id="biblio-list"></ol>
+  </div>
+</section>
 
-<section class="credits-section" aria-label="Créditos">
+<!-- ======================= MÓDULO 7: CRÉDITOS ======================= -->
+<section class="module-panel" id="panel-m7" role="tabpanel" aria-labelledby="tab-m7">
+  <div class="module-intro">
+    <h2>Módulo 7 · Créditos</h2>
+  </div>
   <div class="credits-card">
-    <h2>Créditos</h2>
     <p class="credits-name">Hernán Darío Herrera Salazar, MD.</p>
     <ul class="credits-list">
       <li>Médico y cirujano, Universidad del Valle.</li>
@@ -555,8 +560,10 @@ footer.app-footer a{color:#c8d6ec;}
   </div>
 </section>
 
+</main>
+
 <footer class="app-footer">
-  <p>Aplicación educativa autocontenida · Contenido derivado exclusivamente de los artículos, gráficos, podcast e imágenes suministrados · Uso académico para fellows de UCIP</p>
+  <p>Aplicación educativa autocontenida · Uso académico para fellows de UCIP</p>
   <p>Versión 1, 2026</p>
   <button class="admin-entry-link" id="admin-entry-btn" type="button">Panel de administrador</button>
 </footer>
@@ -761,7 +768,7 @@ function gl(term, display){
 /* ============================================================
    2. NAVEGACIÓN ENTRE MÓDULOS (SPA, sin recarga)
    ============================================================ */
-const modules = ["m1","m2","m3","m4","m5"];
+const modules = ["m1","m2","m3","m4","m5","m6","m7"];
 function showModule(id){
   modules.forEach(function(m){
     document.getElementById("panel-"+m).classList.toggle("active", m===id);
@@ -1846,12 +1853,13 @@ function renderBibliography(){
     toggleBtn.setAttribute("aria-expanded", open ? "true":"false");
   });
 
-  // Delegación: clic en cualquier cita del contenido abre y resalta la referencia
+  // Delegación: clic en cualquier cita del contenido lleva al módulo de bibliografía y resalta la referencia
   document.addEventListener("click", function(e){
     const link = e.target.closest(".cite-link");
     if(!link) return;
     e.preventDefault();
     const num = link.getAttribute("data-refnum");
+    showModule("m6");
     list.classList.add("open");
     toggleBtn.setAttribute("aria-expanded","true");
     const target = document.getElementById("ref-"+num);
