@@ -2645,7 +2645,7 @@ function renderTutorMessages(){
   const box = document.getElementById("tutor-messages");
   if(!box) return;
   if(TUTOR_HISTORY.length === 0){
-    box.innerHTML = '<p class="tutor-empty">¡Hola! Soy tu Tutor de TRRC 👋<br>Pregúntame sobre cualquier tema del curso — te iré guiando con preguntas para que construyas la respuesta tú mismo.</p>';
+    box.innerHTML = '<p class="tutor-empty">¡Hola! Soy tu Tutor de TRRC 👋<br>Pregúntame sobre cualquier tema del curso y te guiaré paso a paso.</p>';
     return;
   }
   box.innerHTML = TUTOR_HISTORY.map(function(m){
